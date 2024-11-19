@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "300322187144",
+    "project_id": "pawprints-40b61",
+    "storage_bucket": "pawprints-40b61.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:300322187144:android:086250600e8403672d7c3d",
+        "android_client_info": {
+          "package_name": "com.eutech.pawprints"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpFxXnNiwCglAiDMk5DllAqbQ7nhtoTtQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,231 @@
+package com.eutech.pawprints.home.presentation
+
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
+import com.eutech.pawprints.R
+import com.eutech.pawprints.home.data.ProductWithCart
+import com.eutech.pawprints.home.data.computeTotal
+import com.eutech.pawprints.products.data.Category
+import com.eutech.pawprints.products.presentation.product.CategoryTabItem
+import com.eutech.pawprints.products.presentation.product.CategoryTabs
+import com.eutech.pawprints.products.presentation.product.ProductCard
+import com.eutech.pawprints.products.presentation.product.ProductEvents
+import com.eutech.pawprints.shared.presentation.routes.MainRouter
+import com.eutech.pawprints.shared.presentation.utils.displayPrice
+import com.eutech.pawprints.shared.presentation.utils.toPhp
+import com.eutech.pawprints.ui.custom.CartItemPrice
+import com.eutech.pawprints.ui.custom.PriceText
+import com.eutech.pawprints.ui.custom.PrimaryButton
+
+
+@Composable
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    state : HomeState,
+    events : (HomeEvents) -> Unit,
+    navHostController: NavHostController
+) {
+
+    Row(
+        modifier = modifier.fillMaxSize()
+    ){
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .weight(1f)
+        ) {
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+            ){
+                AdminHeader(state=state, events = events)
+                HomeCategoryTab(
+                    modifier = Modifier,
+                    state = state,
+                    events = events
+                )
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(state.products) {
+                        ProductCard(product = it) {
+                            events(HomeEvents.OnAddProduct(it))
+                        }
+                    }
+
+                }
+            }
+        }
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .weight(.6f)
+        ) {
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+
+            ) {
+               Text(text = "Cart (${state.cartItems.size})", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                CartList(
+                    modifier = modifier.weight(1f),
+                    state = state,
+                    events = events
+                )
+                val cartItems = state.cartItems.values.toList().map { it.cartItems }
+
+                PrimaryButton(label = "Checkout (${cartItems.computeTotal().toPhp()})") {
+
+                }
+            }
+
+        }
+    }
+}
+
+@Composable
+fun CartList(
+    modifier: Modifier = Modifier,
+    state: HomeState,
+    events: (HomeEvents) -> Unit
+) {
+    LazyColumn(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        val cartItems = state.cartItems.values.toList()
+        items(cartItems) { item: ProductWithCart ->
+            CartItemCard(item= item)
+        }
+    }
+}
+
+@Composable
+fun CartItemCard(
+    modifier: Modifier = Modifier,
+    item: ProductWithCart
+) {
+    Card {
+        Row(
+            modifier = modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ){
+            val product = item.product
+            val cart = item.cartItems
+
+            AsyncImage(
+                model = product.image,
+                contentDescription = product.name,
+                placeholder = painterResource(id = R.drawable.product),
+                error = painterResource(id = R.drawable.product),
+                contentScale = ContentScale.Crop,
+                modifier = modifier
+                    .height(90.dp)
+                    .width(90.dp)
+            )
+            Row(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                Column(
+                    modifier = modifier.weight(1f)
+                ) {
+                    Text(
+                        text = "${cart.quantity}x ${product.name}" ,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    val price = product.price.displayPrice(cart.discount)
+                    CartItemPrice(cartItems = cart)
+                }
+
+
+            }
+
+        }
+    }
+}
+
+@Composable
+fun HomeCategoryTab(modifier: Modifier = Modifier, state: HomeState, events: (HomeEvents) -> Unit) {
+    val categories = state.categoryList
+    val selectedIndex = state.selectedCategoryIndex
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        categories.forEachIndexed { index: Int, category: Category ->
+            CategoryTabItem(
+                index = index,
+                selectedIndex = state.selectedCategoryIndex,
+                category = category ,
+                onClick = {
+                    events.invoke(HomeEvents.OnCategoryClick(it))
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun AdminHeader(
+    modifier: Modifier = Modifier,
+    state: HomeState,
+    events: (HomeEvents) -> Unit
+) {
+    val admin = state.admin
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(12.dp),
+    ) {
+        Text(
+            text = "Hi, ${admin?.name}",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+    }
+
+}
