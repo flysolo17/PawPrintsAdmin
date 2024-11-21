@@ -24,7 +24,13 @@ enum class NavigationRailItems(
         route = MainRouter.Home.route,
     ),
 
-
+    MESSAGE(
+        label = "Messages",
+        selectedIcon = R.drawable.baseline_message_24,
+        unselectedIcon = R.drawable.outline_message_24,
+        hasNews = false,
+        route = MainRouter.Messages.route,
+    ),
     PETS(
         label = "Pets",
         selectedIcon = R.drawable.baseline_pets_24,

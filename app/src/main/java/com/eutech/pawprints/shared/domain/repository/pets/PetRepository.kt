@@ -8,4 +8,8 @@ interface PetRepository {
     suspend fun getAllPets(
         result: (Results<List<Pet>>) -> Unit
     )
+    suspend fun getPetsByUserID(
+        userID : String,
+        result: (Results<List<Pet>>) -> Unit
+    )
 }

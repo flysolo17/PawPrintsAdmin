@@ -15,6 +15,8 @@ sealed class AuthRouter(
 sealed class MainRouter(val route : String) {
     data object Main : MainRouter("main")
     data object Home : MainRouter("home")
+
+    data object Messages : MainRouter("messages")
     data object Pets : MainRouter("pets")
     data object Users : MainRouter("users")
     data object ScheduleRoute : MainRouter("schedules")

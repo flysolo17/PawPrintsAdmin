@@ -6,4 +6,5 @@ import com.eutech.pawprints.shared.presentation.utils.Results
 
 interface InboxRepository  {
     suspend fun getAllInboxByUserID(userID : String,result : (Results<List<Inbox>>) -> Unit)
+
 }

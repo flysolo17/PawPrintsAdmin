@@ -113,10 +113,9 @@ fun PetScreen(
                 PetInfo(
                     selectedPet =  state.selectedPet,
                     state = state,
-                    onGetPetAppointments = {state.selectedPet.id?.let { events(PetEvents.OnGetPetAppointments(it)) }}
+                    onGetPetAppointments = { state.selectedPet.id?.let { events(PetEvents.OnGetPetAppointments(it)) }}
                 )
             }
-
         }
 
     }

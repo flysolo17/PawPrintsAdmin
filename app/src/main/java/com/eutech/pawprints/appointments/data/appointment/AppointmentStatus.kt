@@ -26,6 +26,7 @@ fun AppointmentStatus?.getColor(): Color {
     }
 }
 
+
 fun AppointmentStatus?.getIcon(): ImageVector {
     return when (this) {
         AppointmentStatus.CONFIRMED -> Icons.Rounded.CheckCircle

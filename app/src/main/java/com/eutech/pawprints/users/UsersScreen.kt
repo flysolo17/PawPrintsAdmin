@@ -106,11 +106,10 @@ fun UsersScreen(
                 UserInfoLayout(
                     users =  state.selectedUser,
                     state = state,
-                   events = events
+                    events = events
                 )
             }
         }
-
     }
 }
 

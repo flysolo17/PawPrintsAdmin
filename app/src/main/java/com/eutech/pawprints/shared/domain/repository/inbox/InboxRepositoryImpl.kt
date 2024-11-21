@@ -2,10 +2,12 @@ package com.eutech.pawprints.shared.domain.repository.inbox
 
 import com.eutech.pawprints.appointments.data.appointment.Inbox
 import com.eutech.pawprints.appointments.domain.INBOX_COLLECTION
+import com.eutech.pawprints.shared.data.pets.Pet
 import com.eutech.pawprints.shared.presentation.utils.Results
 import com.eutech.pawprints.ui.custom.createLog
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import kotlinx.coroutines.delay
 
 class InboxRepositoryImpl(
     private val firestore : FirebaseFirestore,
@@ -14,17 +16,20 @@ class InboxRepositoryImpl(
         userID: String,
         result: (Results<List<Inbox>>) -> Unit
     ) {
+        result(Results.loading("Getting user inbox"))
+        delay(1000)
         firestore.collection(INBOX_COLLECTION)
             .whereEqualTo("userID",userID)
             .orderBy("createdAt",Query.Direction.DESCENDING)
-            .addSnapshotListener { value, error ->
-                INBOX_COLLECTION.createLog(error?.message.toString(),error)
-                value?.let {
-                    result.invoke(Results.success(it.toObjects(Inbox::class.java)))
+            .get()
+            .addOnCompleteListener {
+                if (it.isSuccessful) {
+                    result(Results.success(it.result.toObjects(Inbox::class.java)))
+                } else {
+                    result(Results.failuire("Error getting inboxes"))
                 }
-                error?.let {
-                    result.invoke(Results.failuire(it.message.toString()))
-                }
+            }.addOnFailureListener {
+                result(Results.failuire(it.message.toString()))
             }
     }
 }

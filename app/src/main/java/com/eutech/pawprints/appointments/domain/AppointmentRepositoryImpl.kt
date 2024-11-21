@@ -1,5 +1,6 @@
 package com.eutech.pawprints.appointments.domain
 
+import android.util.Log
 import com.eutech.pawprints.appointments.data.appointment.AppointmentStatus
 import com.eutech.pawprints.appointments.data.appointment.AppointmentWithAttendeesAndPets
 import com.eutech.pawprints.appointments.data.appointment.Appointments
@@ -236,6 +237,29 @@ class AppointmentRepositoryImpl(
                 error?.let {
                     result(Results.failuire(it.message.toString()))
                 }
+            }
+    }
+
+    override suspend fun getMyAppointments(
+        userID: String,
+        result: (Results<List<Appointments>>) -> Unit
+    ) {
+        result.invoke(Results.loading("Getting appointments"))
+        delay(1000)
+        firestore.collection(APPOINTMENT_COLLECTION)
+            .whereEqualTo("userID",userID)
+            .orderBy("createdAt",Query.Direction.DESCENDING)
+            .orderBy("updatedAt",Query.Direction.DESCENDING)
+            .get()
+            .addOnCompleteListener {
+                if (it.isSuccessful) {
+                    val data = it.result.toObjects(Appointments::class.java)
+                    result(Results.success(data))
+                } else {
+                    result.invoke(Results.failuire("failed getting appointments"))
+                }
+            }.addOnFailureListener {
+                result.invoke(Results.failuire(it.message.toString()))
             }
     }
 

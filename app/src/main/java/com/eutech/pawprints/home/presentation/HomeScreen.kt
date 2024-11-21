@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -99,28 +100,26 @@ fun HomeScreen(
             .fillMaxSize()
             .padding(8.dp)
     ) {
-        Column(
+        Box(
             modifier = modifier
                 .fillMaxSize()
                 .weight(1f)
         ) {
-            DashboardInfo(
-                modifier = modifier,
-                state
-            )
-            val schedules = state.schedules.map {it.schedule!!}
-            PawPrintCalendarView(
-                isLoading = state.isLoading,
-                selectedDate = state.selectedDate,
-                schedules = schedules,
-                appointments = emptyList(),
-                onDateSelected = {
-                    events(HomeEvents.OnDateChange(it))
-                },
-                onMonthChange = {
-                    events(HomeEvents.OnGetSchedules(it))
-                }
-            )
+            Card(modifier = modifier.fillMaxSize().padding(8.dp)) {
+                val schedules = state.schedules.map {it.schedule!!}
+                PawPrintCalendarView(
+                    isLoading = state.isLoading,
+                    selectedDate = state.selectedDate,
+                    schedules = schedules,
+                    appointments = emptyList(),
+                    onDateSelected = {
+                        events(HomeEvents.OnDateChange(it))
+                    },
+                    onMonthChange = {
+                        events(HomeEvents.OnGetSchedules(it))
+                    }
+                )
+            }
         }
 
         Box(
@@ -136,6 +135,7 @@ fun HomeScreen(
                 state = state,
                 events = events
             )
+
         }
     }
 

@@ -14,8 +14,12 @@ import com.eutech.pawprints.products.domain.ProductRepository
 import com.eutech.pawprints.products.domain.ProductRepositoryImpl
 import com.eutech.pawprints.shared.domain.repository.inbox.InboxRepository
 import com.eutech.pawprints.shared.domain.repository.inbox.InboxRepositoryImpl
+import com.eutech.pawprints.shared.domain.repository.messages.MessagesRepository
+import com.eutech.pawprints.shared.domain.repository.messages.MessagesRepositoryImpl
 import com.eutech.pawprints.shared.domain.repository.pets.PetRepository
 import com.eutech.pawprints.shared.domain.repository.pets.PetRepositoryImpl
+import com.eutech.pawprints.shared.domain.repository.transactions.TransactionRepository
+import com.eutech.pawprints.shared.domain.repository.transactions.TransactionRepositoryImpl
 import com.eutech.pawprints.shared.domain.repository.users.UsersRepository
 import com.eutech.pawprints.shared.domain.repository.users.UsersRepositoryImpl
 import com.google.firebase.auth.FirebaseAuth
@@ -105,5 +109,21 @@ object AppModules {
         firestore: FirebaseFirestore,
     ) : InboxRepository {
         return  InboxRepositoryImpl(firestore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTransactionsRepository(
+        firestore: FirebaseFirestore,
+    ) : TransactionRepository {
+        return  TransactionRepositoryImpl(firestore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMessageRepository(
+        firestore: FirebaseFirestore,
+    ) : MessagesRepository {
+        return  MessagesRepositoryImpl(firestore)
     }
 }

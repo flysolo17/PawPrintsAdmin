@@ -43,4 +43,10 @@ interface AppointmentRepository {
         appointments: Appointments,
         result: (Results<String>) -> Unit
     )
+
+
+    suspend fun getMyAppointments(
+        userID : String,
+        result: (Results<List<Appointments>>) -> Unit
+    )
 }
