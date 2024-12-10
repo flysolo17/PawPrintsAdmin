@@ -41,7 +41,7 @@ object AppModules {
         firestore: FirebaseFirestore,
         storage: FirebaseStorage
     ) : AuthRepository {
-        return AuthRepositoryImpl(auth,firestore)
+        return AuthRepositoryImpl(auth,firestore,storage)
     }
 
     @Provides
@@ -115,8 +115,9 @@ object AppModules {
     @Singleton
     fun provideTransactionsRepository(
         firestore: FirebaseFirestore,
+        productRepository: ProductRepository,
     ) : TransactionRepository {
-        return  TransactionRepositoryImpl(firestore)
+        return  TransactionRepositoryImpl(firestore,productRepository)
     }
 
     @Provides

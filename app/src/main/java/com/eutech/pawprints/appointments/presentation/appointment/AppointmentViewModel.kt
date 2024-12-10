@@ -9,10 +9,12 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.eutech.pawprints.appointments.data.appointment.AppointmentStatus
+import com.eutech.pawprints.appointments.data.appointment.Appointments
 import com.eutech.pawprints.appointments.domain.AppointmentRepository
 import com.eutech.pawprints.shared.presentation.utils.Results
 import com.eutech.pawprints.shared.presentation.utils.toast
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,6 +35,7 @@ class AppointmentViewModel @Inject constructor(
     init {
         events(AppointmentEvent.OnGetAllAppointment)
     }
+
     fun events(e : AppointmentEvent) {
         when(e) {
             AppointmentEvent.OnGetAllAppointment -> getAppointments()
@@ -40,27 +43,62 @@ class AppointmentViewModel @Inject constructor(
                 selectedTab = e.tab,
 
             )
-
-            is AppointmentEvent.OnUpdateStatus -> updateStatus(e.id,e.status,e.context)
+            is AppointmentEvent.OnUpdateAppointment -> updateStatus(
+                e.status,
+                e.appointments
+            )
         }
     }
-
-    private fun updateStatus(id : String, status: AppointmentStatus, context: Context) {
+    private fun updateStatus(status: AppointmentStatus, appointments: Appointments) {
         viewModelScope.launch {
-            appointmentRepository.updateAppointmentStatus(id,status) {
-                if (it is Results.success) {
-                    context.toast(it.data)
+            appointmentRepository.updateAppointmentStatus(
+                status = status,
+                appointments = appointments
+            ) {
+                state = when (it) {
+                    is Results.failuire -> state.copy(
+                        updatingStatus = false,
+                        errors = it.message,
+                    )
+                    is Results.loading -> state.copy(
+                        updatingStatus = true,
+                        errors = null,
+                    )
+                    is Results.success -> state.copy(
+                        updatingStatus = false,
+                        errors = null,
+                        isUpdated = it.data
+                    )
                 }
-                if (it is Results.failuire) {
-                    context.toast(it.message)
-                }
+
             }
+            delay(1000)
+            state = state.copy(
+                updatingStatus = false,
+                errors = null,
+                isUpdated = null
+            )
         }
+
+
     }
+
+//    private fun updateStatus(id : String, status: AppointmentStatus, context: Context) {
+//        viewModelScope.launch {
+//            appointmentRepository.updateAppointmentStatus(id,status) {
+//                if (it is Results.success) {
+//                    context.toast(it.data)
+//                }
+//                if (it is Results.failuire) {
+//                    context.toast(it.message)
+//                }
+//            }
+//        }
+//    }
 
     private fun getAppointments() {
        viewModelScope.launch {
-           appointmentRepository.getAppointment(org.threeten.bp.LocalDate.now()) {
+           appointmentRepository.getAppointmentWithAttendeesAndPets {
                state = when(it) {
                    is Results.failuire -> state.copy(
                        isLoading = false,
@@ -79,6 +117,4 @@ class AppointmentViewModel @Inject constructor(
            }
        }
     }
-
-
 }

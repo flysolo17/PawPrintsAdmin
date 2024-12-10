@@ -180,6 +180,77 @@ class AppointmentRepositoryImpl(
             }
     }
 
+    override suspend fun getAppointmentWithAttendeesAndPets(result: (Results<List<AppointmentWithAttendeesAndPets>>) -> Unit) {
+        firestore.collection(APPOINTMENT_COLLECTION)
+            .whereNotEqualTo("status", AppointmentStatus.CANCELLED)
+            .orderBy("createdAt", Query.Direction.DESCENDING)
+            .orderBy("updatedAt", Query.Direction.DESCENDING)
+            .orderBy("scheduleDate", Query.Direction.ASCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    APPOINTMENT_COLLECTION.createLog(error.message.toString(), error)
+                    result.invoke(Results.failuire(error.message.toString()))
+                    return@addSnapshotListener
+                }
+                if (snapshot != null && !snapshot.isEmpty) {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        try {
+                            val appointments = snapshot.toObjects(Appointments::class.java)
+
+                            // List to store the combined data
+                            val appointmentDetailsList = appointments.map { appointment ->
+                                // Fetch doctor info if any
+                                val doctor = appointment.attendees
+                                    .firstOrNull { it.type == AttendeeType.DOCTOR }
+                                    ?.let { doctorAttendee ->
+                                        firestore.collection(DOCTORS_COLLECTION)
+                                            .document(doctorAttendee.id!!)
+                                            .get()
+                                            .await()
+                                            .toObject(Doctors::class.java)
+                                    }
+
+
+                                val user = firestore.collection(USERS_COLLECTION)
+                                    .document(appointment.userID!!)
+                                    .get()
+                                    .await()
+                                    .toObject(Users::class.java)
+
+
+                                val pets = if (appointment.pets.isNotEmpty()) {
+                                    firestore.collection(PETS_COLLECTION)
+                                        .whereIn("id", appointment.pets)
+                                        .get()
+                                        .await()
+                                        .toObjects(Pet::class.java)
+                                } else {
+                                    emptyList()
+                                }
+
+                                AppointmentWithAttendeesAndPets(
+                                    appointments = appointment,
+                                    pets = pets,
+                                    doctors = doctor,
+                                    users = user
+                                )
+                            }
+
+                            withContext(Dispatchers.Main) {
+                                result.invoke(Results.success(appointmentDetailsList))
+                            }
+
+                        } catch (e: Exception) {
+                            APPOINTMENT_COLLECTION.createLog(e.message.toString(), e)
+                            result.invoke(Results.failuire(e.message.toString()))
+                        }
+                    }
+                } else {
+                    result.invoke(Results.success(emptyList()))
+                }
+            }
+    }
+
 
     override suspend fun cancelAppointmentDueToPastDate(
         appointments: List<AppointmentWithAttendeesAndPets>,

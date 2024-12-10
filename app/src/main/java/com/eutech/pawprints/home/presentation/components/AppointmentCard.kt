@@ -95,9 +95,11 @@ fun AppointmentCard(
 
     Card(
         shape = MaterialTheme.shapes.medium,
-        modifier = modifier.fillMaxWidth().clickable {
-            isAppointmentClicked = !isAppointmentClicked
-        },
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable {
+                isAppointmentClicked = !isAppointmentClicked
+            },
         border = BorderStroke(width = 2.dp, color = borderColor)
     ) {
         Row(
@@ -184,7 +186,9 @@ fun AppointmentInfoDialog(
                     Text(
                         "${data.appointments.title}",
                         style = MaterialTheme.typography.titleLarge,
-                        modifier = modifier.fillMaxWidth().padding(bottom = 12.dp)
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
                     )
                 }
                 item(span = { GridItemSpan(1) }) {
@@ -225,7 +229,9 @@ fun AppointmentInfoDialog(
                 item(span = { GridItemSpan(1) }) {
                     AppointmentInfo(title = "Attendees") {
                         Column(
-                            modifier = modifier.fillMaxWidth().padding(8.dp)
+                            modifier = modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
                         ) {
                             data.appointments.attendees.forEach {
                                 AttendeeCardInfo(attendees = it)
@@ -236,7 +242,9 @@ fun AppointmentInfoDialog(
                 item(span = { GridItemSpan(1) }) {
                     AppointmentInfo(title = "Pets") {
                         Column(
-                            modifier = modifier.fillMaxWidth().padding(8.dp)
+                            modifier = modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
                         ) {
                             data.pets.forEach {
                                 PetAppointmentCard(pet = it)
@@ -246,19 +254,21 @@ fun AppointmentInfoDialog(
                 }
                 item(span = { GridItemSpan(2) }) {
                     Row(
-                        modifier = modifier.fillMaxWidth().padding(8.dp),
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.End
                     ) {
-                        TextButton(onClick = {onDismiss()}) {
+                        TextButton(onClick = { onDismiss() }) {
                             Text("Close")
                         }
                         Spacer(
                             modifier = modifier.width(8.dp)
                         )
                         val current = data.appointments.status?.name
-                        EditStatusButton(){
-                            onConfirm(it,data.appointments)
+                        EditStatusButton() {
+                            onConfirm(it, data.appointments)
                         }
                     }
                 }
@@ -274,7 +284,9 @@ fun EditStatusButton(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val statuses = AppointmentStatus.entries.toTypedArray()
-    Box(modifier = Modifier.width(200.dp).wrapContentSize(Alignment.TopStart)) {
+    Box(modifier = Modifier
+        .width(200.dp)
+        .wrapContentSize(Alignment.TopStart)) {
         OutlinedButton(
             onClick = { expanded = !expanded },
             shape = MaterialTheme.shapes.small,
@@ -289,15 +301,19 @@ fun EditStatusButton(
                         val icon = status.getIcon()
                         val color = status.getColor()
                         Box(
-                            modifier = modifier.wrapContentSize().background(
-                                color = color,
-                                shape = CircleShape
-                            )
+                            modifier = modifier
+                                .wrapContentSize()
+                                .background(
+                                    color = color,
+                                    shape = CircleShape
+                                )
                         ){
                             Icon(
                                 imageVector = icon,
                                 contentDescription = status.name,
-                                modifier = modifier.size(24.dp).padding(4.dp),
+                                modifier = modifier
+                                    .size(24.dp)
+                                    .padding(4.dp),
                                 tint = Color.White
                             )
                         }

@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,18 +69,27 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
+    state: MainState,
+    events: (MainEvents) -> Unit,
     mainNavController : NavHostController,
     navHostController: NavHostController = rememberNavController()
 ) {
     val items = NavigationRailItems.entries.toList()
     val navBackStackEntry by navHostController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination
+    LaunchedEffect(state.unseenMessages) {
+        items[1].badgeCount = state.unseenMessages.size
+    }
 
     Row(
         modifier = modifier.fillMaxSize()
     ) {
         if (items.any { it.route == currentRoute?.route } || currentRoute?.route == ProductRouter.Products.route) {
-            MainNavigationRail(navController = navHostController, navBackStackEntry = navBackStackEntry, items = items)
+            MainNavigationRail(
+                navController = navHostController,
+                navBackStackEntry = navBackStackEntry,
+                items = items
+            )
         }
         Scaffold {
             Box(
@@ -109,9 +121,10 @@ private fun MainNavigationRail(
         ) {
             items.forEachIndexed { index, it ->
                 val isSelected = it.route == currentRoute?.route
-                val isProduct = if (index == 2) currentRoute?.route in listOf(
+                val isProduct = if (index == 5) currentRoute?.route in listOf(
                     ProductRouter.Products.route,
-                    ProductRouter.ViewProduct.route
+                    ProductRouter.ViewProduct.route,
+                    ProductRouter.EditProduct.route
                 ) else false
                 NavigationRailItem(
                     selected = isSelected || isProduct,
@@ -124,7 +137,24 @@ private fun MainNavigationRail(
                             restoreState = true
                         }
                     },
-                    icon = {  Icon(painter = painterResource(id = if (isSelected || isProduct) it.selectedIcon else it.unselectedIcon), contentDescription = "${it.label} icon") },
+                    icon = {
+                        BadgedBox(badge = {
+                            if (it.badgeCount != null) {
+                                Badge {
+                                    Text(text = it.badgeCount.toString())
+                                }
+                            } else if (it.hasNews) {
+                                Badge()
+                            }
+                        }) {
+                            if (isSelected) {
+                                Icon(painter = painterResource(it.selectedIcon), contentDescription = it.route)
+                            } else {
+                                Icon(painter = painterResource(it.unselectedIcon), contentDescription = it.route)
+                            }
+                        }
+                        Icon(painter = painterResource(id = if (isSelected || isProduct) it.selectedIcon else it.unselectedIcon), contentDescription = "${it.label} icon")
+                           },
                     alwaysShowLabel = isSelected || isProduct,
                     label = { Text(
                         text = it.label,

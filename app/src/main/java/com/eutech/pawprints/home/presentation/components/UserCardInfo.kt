@@ -33,6 +33,7 @@ import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import com.eutech.pawprints.R
 import com.eutech.pawprints.shared.data.users.Users
+import com.eutech.pawprints.shared.presentation.utils.navigateToPhone
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -71,18 +72,6 @@ fun UserCardInfo(modifier: Modifier = Modifier,users: Users) {
                     )
             )
         },
-        trailing = {
-            FilledIconButton(onClick = {
-                val dialIntent = Intent(Intent.ACTION_DIAL).apply {
-                    data = Uri.parse("tel:${users.phone}")
-                }
-                ContextCompat.startActivity(context, dialIntent, null)
-            }) {
-                Icon(
-                    imageVector = Icons.Filled.Phone,
-                    contentDescription = "Phone"
-                )
-            }
-        }
+
     )
 }

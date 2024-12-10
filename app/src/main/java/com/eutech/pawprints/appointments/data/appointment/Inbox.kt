@@ -15,5 +15,7 @@ data class Inbox(
 
 enum class InboxTpe {
     APPOINTMENTS,
-    TRANSACTIONS
+    TRANSACTIONS,
+    PAYMENT
 }
+

@@ -24,6 +24,7 @@ interface AppointmentRepository {
         result: (Results<String>) -> Unit
     )
 
+
     suspend fun getAppointmentWithAttendeesAndPets(
         localDate: LocalDate,
         result: (Results<List<AppointmentWithAttendeesAndPets>>) -> Unit
@@ -48,5 +49,9 @@ interface AppointmentRepository {
     suspend fun getMyAppointments(
         userID : String,
         result: (Results<List<Appointments>>) -> Unit
+    )
+
+    suspend fun getAppointmentWithAttendeesAndPets(
+        result: (Results<List<AppointmentWithAttendeesAndPets>>) -> Unit
     )
 }

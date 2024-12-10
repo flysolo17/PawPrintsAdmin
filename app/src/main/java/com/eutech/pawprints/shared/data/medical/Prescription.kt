@@ -11,9 +11,7 @@ data class Prescription(
     val dosage: String = "",
     val duration: String = "",
     val instructions: String = "",
-    val vetName: String = "",
-    val vetContact: String = "",
     val notes: String = "",
     val issuedDate: Date = Date(),
-    val expirationDate : Date = Date()
+    val expirationDate : Date ? =null
 )

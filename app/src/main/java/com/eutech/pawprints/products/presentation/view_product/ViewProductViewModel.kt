@@ -13,6 +13,7 @@ import com.eutech.pawprints.shared.presentation.utils.Results
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,6 +26,30 @@ class ViewProductViewModel @Inject constructor(
         when(e) {
             is ViewProductEvents.OnGetProductByID -> getProductByID(e.productID)
             is ViewProductEvents.OnDeleteProduct -> deleteProduct(e.id,e.context,e.navHostController)
+            is ViewProductEvents.OnAddStocks -> addProducts(e.id
+            ,e.quantity,e.date)
+        }
+    }
+
+    private fun addProducts(id: String, quantity: Int, date: Date?) {
+        viewModelScope.launch {
+            productRepository.addProduct(id,quantity,date) {
+                state = when(it){
+                    is Results.failuire -> state.copy(
+                        isAddingStocks = false,
+                        errors = it.message,
+                    )
+                    is Results.loading -> state.copy(
+                        isAddingStocks = true,
+                        errors = null,
+                    )
+                    is Results.success -> {
+                        state.copy(isAddingStocks = false, errors = null, isAdded = it.data)
+                    }
+                }
+            }
+            delay(1000)
+            state = state.copy(isAdded = null)
         }
     }
 
@@ -35,7 +60,6 @@ class ViewProductViewModel @Inject constructor(
                     is Results.failuire -> state.copy(
                         isLoading = false,
                         errors = it.message,
-
                     )
                     is Results.loading -> state.copy(
                         isLoading = true,

@@ -7,4 +7,6 @@ data class ProfileState(
     val isLoading : Boolean = false,
     val administrator: Administrator ? = null,
     val errors : String ? = null,
+    val isChangingProfile : Boolean = false,
+    val isChanged : String ? = null,
 )

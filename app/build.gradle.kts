@@ -4,10 +4,10 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
 
 
-    id("kotlin-parcelize")
+        id("kotlin-parcelize")
 
-    id("kotlin-kapt")
-    id("com.google.dagger.hilt.android")
+        id("kotlin-kapt")
+        id("com.google.dagger.hilt.android")
 
 }
 
@@ -66,6 +66,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.play.services.analytics.impl)
     //calendar
     coreLibraryDesugaring(" 'com.android.tools:desugar_jdk_libs:2.0.3'")
     implementation("com.kizitonwose.calendar:compose:2.5.4")
@@ -117,15 +118,20 @@ dependencies {
     //for color picker
     implementation("com.maxkeppeler.sheets-compose-dialogs:core:1.2.0")
     implementation("com.maxkeppeler.sheets-compose-dialogs:color:1.2.0")
-
-
-    //Number picker
-    implementation ("com.chargemap.compose:numberpicker:1.0.3")
-
     //icons
     implementation("androidx.compose.material:material-icons-extended:1.5.3")
 
     implementation ("androidx.compose.foundation:foundation:1.7.4")
+
+
+
+
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    //Number picker
+    implementation ("com.chargemap.compose:numberpicker:1.0.3")
+
+
 
 
     implementation("com.jakewharton.threetenabp:threetenabp:1.3.1")

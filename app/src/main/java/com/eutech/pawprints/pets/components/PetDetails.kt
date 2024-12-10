@@ -76,14 +76,17 @@ fun PetDetails(
             color = MaterialTheme.colorScheme.onSurface
         )
         DetailRow(label = "Breed", value = pet.breed ?: "Unknown")
-        DetailRow(label = "Sex", value = pet.otherDetails?.get("Sex") ?: "Unknown")
+
         val age = pet.birthday?.getAge()?.toString() ?: "Unknown"
         DetailRow(label = "Date of Birth", value = "${pet.birthday ?: "Unknown"} ($age)")
+        pet?.otherDetails?.forEach {
+            DetailRow(label = it.label ?: "unknown", value = it.value ?: "Unknown")
+        }
 
-        Spacer(modifier = Modifier.height(16.dp))
 
 
-        PetHealthDetails(pet.otherDetails)
+
+
     }
 }
 
@@ -126,9 +129,7 @@ fun PetHealthDetails(otherDetails: Map<String, String>?) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        PetActionsCard(title = "Medical Record", icon = R.drawable.medical_record)
-        PetActionsCard(title = "Prescriptions", icon = R.drawable.prescriptions)
+
     }
 }
 @Preview(showBackground = true)
@@ -144,12 +145,7 @@ private fun PetDetailsPrev(
         species = "Dog",
         breed = "Golden Retriever",
         birthday = "2020-06-15",
-        otherDetails = mapOf(
-            "Weight" to "30.5 kg", // in kilograms
-            "Height" to "60.0 cm", // in centimeters
-            "BMI" to "16.95", // Body Mass Index
-            "Medical Conditions" to "Allergy to pollen, Hip Dysplasia"
-        ),
+        otherDetails = emptyList(),
         createdAt = Date(),
         updatedAt = Date()
     )

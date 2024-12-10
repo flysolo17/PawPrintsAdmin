@@ -56,6 +56,7 @@ import com.eutech.pawprints.appointments.presentation.components.PawPrintCalenda
 import com.eutech.pawprints.home.presentation.components.AppointmentLayout
 import com.eutech.pawprints.home.presentation.components.DashboardInfoCard
 import com.eutech.pawprints.schedule.data.countSlots
+import com.eutech.pawprints.shared.presentation.routes.MainRouter
 import com.eutech.pawprints.shared.presentation.utils.toast
 import org.threeten.bp.LocalDate
 import java.text.SimpleDateFormat
@@ -133,7 +134,17 @@ fun HomeScreen(
                 appointments = state.appointment,
                 onFilterChange = {},
                 state = state,
-                events = events
+                events = events,
+                onClickOrder = {
+                    navHostController.navigate(MainRouter.Orders.route)
+                },
+                orders = state.orders,
+                onNavigateToPos = {
+                    navHostController.navigate(MainRouter.Pos.route)
+                },
+                onNavigateToAppointments = {
+                    navHostController.navigate(MainRouter.Appointments.route)
+                }
             )
 
         }

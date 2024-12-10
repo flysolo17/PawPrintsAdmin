@@ -5,16 +5,18 @@ import androidx.compose.foundation.layout.Column
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ListItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -24,10 +26,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -54,11 +54,16 @@ import com.eutech.pawprints.R
 import com.eutech.pawprints.products.data.products.Movement
 import com.eutech.pawprints.products.data.products.ProductType
 import com.eutech.pawprints.products.data.products.Products
+import com.eutech.pawprints.products.data.products.getColor
+import com.eutech.pawprints.products.presentation.add_stocks.AddStocksDialog
+import com.eutech.pawprints.shared.presentation.routes.ProductRouter
 import com.eutech.pawprints.shared.presentation.utils.ErrorScreen
+import com.eutech.pawprints.shared.presentation.utils.displayDate
 import com.eutech.pawprints.shared.presentation.utils.toCreatedAt
 import com.eutech.pawprints.shared.presentation.utils.toExpireFormat
 import com.eutech.pawprints.shared.presentation.utils.toPhp
 import com.eutech.pawprints.shared.presentation.utils.toStocks
+import com.eutech.pawprints.shared.presentation.utils.toast
 import com.eutech.pawprints.ui.custom.LoadingScreen
 import com.eutech.pawprints.ui.custom.PawPrintActionButton
 import com.eutech.pawprints.ui.custom.PawPrintText
@@ -75,12 +80,30 @@ fun ViewProductScreen(
     events: (ViewProductEvents) -> Unit,
     navHostController: NavHostController,
 ) {
+    val context = LocalContext.current
     LaunchedEffect(productID) {
         if (productID.isNotEmpty()){
             events(ViewProductEvents.OnGetProductByID(productID))
         }
     }
-    val context = LocalContext.current
+    LaunchedEffect(state) {
+        if (state.errors != null) {
+            context.toast(state.errors)
+        }
+        if (state.isAdded != null) {
+            context.toast(state.isAdded)
+        }
+    }
+
+    var addStocksDialog by remember { mutableStateOf(false) }
+    if (addStocksDialog) {
+        AddStocksDialog(
+            onDismiss = {addStocksDialog = !addStocksDialog},
+            onConfirm = {quantity ,expiry ->
+                events(ViewProductEvents.OnAddStocks(productID,quantity,expiry))
+            }
+        )
+    }
     Column(
         modifier = modifier
             .fillMaxSize(),
@@ -111,17 +134,22 @@ fun ViewProductScreen(
                     modifier = modifier
                         .fillMaxSize()
                         .padding(8.dp)
-                        .verticalScroll(rememberScrollState())
+
                 ) {
                     ViewProductTopBar(
                         product = state.product,
+                        isAddingStocks = state.isAddingStocks,
                         onBack = {navHostController.popBackStack()},
                         onDelete = {
                             events.invoke(ViewProductEvents.OnDeleteProduct(
                                 productID, context = context,navHostController))
                         },
-                        onAddStocks = {},
-                        onEdit = {}
+                        onAddStocks = {
+                            addStocksDialog = !addStocksDialog
+                        },
+                        onEdit = {
+                            navHostController.navigate(ProductRouter.EditProduct.navigate(state.product.id ?: ""))
+                        }
                     )
                     ViewProductBody(
                         product = state.product
@@ -133,6 +161,7 @@ fun ViewProductScreen(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ViewProductBody(
     modifier: Modifier = Modifier,
@@ -190,49 +219,45 @@ fun ViewProductBody(
             Text(text = product.contents ?: "")
         }
         if (product.type == ProductType.GOODS) {
-            Column(
-               modifier = modifier
-                   .padding(8.dp)
-                   .weight(.6f)
-            ) {
-                Text(text = "Stock Management", style = MaterialTheme.typography.titleMedium)
-                Spacer(modifier = modifier.height(8.dp))
+            LazyColumn(
+                modifier = modifier.fillMaxSize() .weight(.6f).padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ){
+                item {
+                    Text(text = "Stock Management", style = MaterialTheme.typography.titleMedium)
+                }
                 val sortedStocks = product.stocks.sortedByDescending { it.date }
-                sortedStocks.forEach { stocks ->
+
+                items(sortedStocks) {
                     Card(
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Row(
-                            modifier = modifier.padding(8.dp)
-                        ) {
-                            Column(
-                                modifier = modifier.weight(1f)
-                            ) {
-                                Text(text = stocks.message, style = MaterialTheme.typography.titleMedium)
-                                Text(text = stocks.date.toStocks(), style = MaterialTheme.typography.labelSmall)
-                            }
-                            val quantity = when (stocks.movement) {
-                                Movement.IN -> "+${stocks.quantity}"
-                                Movement.OUT -> "-${stocks.quantity}"
-                                else -> "Sold(${stocks.quantity})"
-                            }
+                        modifier = modifier.fillMaxWidth()
+                    ){
+                        ListItem(
+                            text = {
+                                Column {
+                                    Text("${it.movement.name}", style = MaterialTheme.typography.titleSmall.copy(
+                                        color = Color.Gray
+                                    ))
+                                    Text(it.message, style = MaterialTheme.typography.titleSmall)
+                                }
 
-                            val textColor = when (stocks.movement) {
-                                Movement.IN -> Color.Green
-                                Movement.OUT -> Color.Red
-                                else -> Color.Yellow
+                            },
+                            secondaryText = {
+                                Text(it.date.displayDate(), style = MaterialTheme.typography.labelSmall.copy(
+                                    color = Color.Gray
+                                ))
+                            },
+                            trailing = {
+                                val text = if (it.movement == Movement.IN) "+${it.quantity}" else "-${it.quantity}"
+                                Text(text, color = it.movement.getColor(), style = MaterialTheme.typography.titleSmall.copy(
+                                    fontWeight = FontWeight.Bold
+                                ))
                             }
-
-                            Text(
-                                text = quantity,
-                                color = textColor,
-                                fontWeight = FontWeight.Black
-                            )
-                        }
+                        )
                     }
                 }
-
             }
+
         }
 
     }
@@ -242,10 +267,11 @@ fun ViewProductBody(
 fun ViewProductTopBar(
     modifier: Modifier = Modifier,
     product: Products,
-    onBack : () -> Unit,
+    onBack: () -> Unit,
     onEdit: () -> Unit,
-    onAddStocks : () -> Unit,
-    onDelete : () -> Unit
+    onAddStocks: () -> Unit,
+    onDelete: () -> Unit,
+    isAddingStocks: Boolean
 ) {
     Row(
         modifier = modifier

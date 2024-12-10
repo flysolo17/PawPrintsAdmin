@@ -3,12 +3,14 @@ package com.eutech.pawprints.shared.presentation.utils
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.chargemap.compose.numberpicker.Hours
+import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
 
 import java.time.YearMonth
 import java.time.format.TextStyle
+import java.util.Date
 import java.util.Locale
 
 object DateUtil {
@@ -48,4 +50,10 @@ fun Hours.toLocalTime(): LocalTime {
     val hour = this.hours
     val minute = this.minutes
     return LocalTime.of(hour, minute)
+}
+
+
+fun Date.displayDate(): String {
+    val formatter = SimpleDateFormat("MMM, dd yyyy hh:mm aa", Locale.getDefault())
+    return formatter.format(this)
 }

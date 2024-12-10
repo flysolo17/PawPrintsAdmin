@@ -32,4 +32,27 @@ class InboxRepositoryImpl(
                 result(Results.failuire(it.message.toString()))
             }
     }
+
+    override suspend fun getInboxByCollectionID(
+        collectionID: String,
+        result: (Results<List<Inbox>>) -> Unit
+    ) {
+        result(Results.loading("Getting inbox for collection ID: $collectionID"))
+        firestore.collection(INBOX_COLLECTION)
+            .whereEqualTo("collectionID", collectionID)
+            .orderBy("createdAt", Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val inboxList = querySnapshot.toObjects(Inbox::class.java)
+                result(Results.success(inboxList))
+            }
+            .addOnFailureListener { exception ->
+                result(Results.failuire(exception.message.toString()))
+                INBOX_COLLECTION.createLog(
+                    exception.message.toString(),
+                    exception
+                )
+            }
+    }
+
 }

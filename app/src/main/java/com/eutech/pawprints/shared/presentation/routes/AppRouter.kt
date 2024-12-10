@@ -1,5 +1,9 @@
 package com.eutech.pawprints.shared.presentation.routes
 
+import com.eutech.pawprints.products.data.products.Products
+import com.google.gson.Gson
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 
 sealed class AuthRouter(
@@ -15,7 +19,7 @@ sealed class AuthRouter(
 sealed class MainRouter(val route : String) {
     data object Main : MainRouter("main")
     data object Home : MainRouter("home")
-
+    data object Pos : MainRouter("pos")
     data object Messages : MainRouter("messages")
     data object Pets : MainRouter("pets")
     data object Users : MainRouter("users")
@@ -24,6 +28,8 @@ sealed class MainRouter(val route : String) {
 
 
     data object CreateAppointment : MainRouter("create-appointment")
+
+
     data object Orders : MainRouter("orders")
     data object Doctors : MainRouter("doctors")
     data object CreateDoctor : MainRouter("create_doctor")
@@ -42,6 +48,13 @@ sealed class ProductRouter(val route: String) {
     data object Main : ProductRouter("product")
     data object Products : ProductRouter("products")
     data object CreateProduct :ProductRouter("create-product")
+
+    data object EditProduct : MainRouter("edit-product/{id}") {
+        fun navigate(id : String) : String {
+            return "edit-product/${id}"
+        }
+    }
+
     data object ViewProduct :ProductRouter("view-product/{id}") {
         fun navigate(id : String) : String {
             return "view-product/${id}"

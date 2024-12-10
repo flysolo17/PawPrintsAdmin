@@ -13,4 +13,6 @@ sealed interface  HomeEvents {
     data class OnGetAppointments(val localDate: LocalDate) : HomeEvents
     data class OnUpdateAppointment(val status : AppointmentStatus,val appointments: Appointments) : HomeEvents
     data class OnAutoCancelAppointments(val appointments:  List<AppointmentWithAttendeesAndPets>): HomeEvents
+
+    data object GetOnlineOrders : HomeEvents
 }

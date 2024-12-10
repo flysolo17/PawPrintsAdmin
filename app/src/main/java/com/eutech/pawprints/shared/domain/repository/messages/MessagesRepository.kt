@@ -14,4 +14,11 @@ sealed interface MessagesRepository {
         message: Message,
         result: (Results<String>) -> Unit
     )
+    suspend fun getUnseenMessages(
+        result: (Results<List<Message>>) -> Unit
+    )
+
+    suspend fun seenMessages(
+        messages : List<String>
+    )
 }

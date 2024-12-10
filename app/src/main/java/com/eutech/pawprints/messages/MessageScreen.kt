@@ -18,8 +18,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Badge
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +38,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
@@ -268,7 +271,20 @@ fun UserWithMessagesCard(
                     .clip(CircleShape)
             )
         },
-        text = { Text(user?.name ?: "no user", style = MaterialTheme.typography.titleMedium) },
+        text = {
+            Row(
+                modifier = modifier.fillMaxWidth()
+            ) {
+
+                Text(
+                    modifier = modifier.fillMaxWidth().weight(1f),
+                    text = user?.name ?: "no user",
+                    style = MaterialTheme.typography.titleMedium,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
+                )
+            }
+        },
         secondaryText = {
             val message = if (messages.isEmpty()) {
                 "No Message yet"
@@ -276,13 +292,13 @@ fun UserWithMessagesCard(
                 messages[0].message ?: "No Message yet"
             }
             val currentMessage = messages.getOrNull(0)
-
+            val unseenMessages = messages.filter { !it.seen && it.type == UserType.CLIENT }.size
             Row {
                 Text(
                     message,
                     style = MaterialTheme.typography.labelMedium.copy(
-                        color = Color.Gray,
-
+                        color = if (unseenMessages == 0) Color.Gray else MaterialTheme.colorScheme.onSurface,
+                        fontWeight =  if (unseenMessages == 0) FontWeight.Normal else FontWeight.Bold
                     ),
                     modifier = modifier
                         .fillMaxWidth()
@@ -296,6 +312,9 @@ fun UserWithMessagesCard(
                     )
                 }
             }
+        },
+        trailing = {
+
         }
     )
 }

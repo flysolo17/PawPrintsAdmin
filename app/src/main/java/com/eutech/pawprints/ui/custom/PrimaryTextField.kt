@@ -24,6 +24,7 @@ fun PrimaryTextField(
     label : String,
     minLines : Int = 1,
     isOptional : Boolean = false,
+    readOnly : Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     onValueChange : (text : String) -> Unit
 ) {
@@ -35,9 +36,9 @@ fun PrimaryTextField(
         label = { Text(text = label) },
         keyboardOptions = keyboardOptions,
         minLines = minLines,
-
         onValueChange = {onValueChange(it)},
         isError = textField.hasError,
+        readOnly = readOnly,
         shape = RoundedCornerShape(4.dp),
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,

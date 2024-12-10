@@ -1,6 +1,7 @@
 package com.eutech.pawprints.shared.domain.repository.messages
 
 import com.eutech.pawprints.shared.data.messages.Message
+import com.eutech.pawprints.shared.data.messages.UserType
 import com.eutech.pawprints.shared.data.messages.UserWithMessages
 import com.eutech.pawprints.shared.data.users.USERS_COLLECTION
 import com.eutech.pawprints.shared.data.users.Users
@@ -64,6 +65,30 @@ class MessagesRepositoryImpl(
             }.addOnFailureListener {
                 result(Results.failuire(it.message.toString()))
             }
+    }
+    override suspend fun getUnseenMessages(result: (Results<List<Message>>) -> Unit) {
+        firestore.collection(MESSAGES_COLLECTION)
+            .whereEqualTo("type",UserType.CLIENT)
+            .whereEqualTo("seen",false)
+            .addSnapshotListener { value, error ->
+                value?.let {
+                    result(Results.success(it.toObjects(Message::class.java)))
+                }
+                error?.let {
+                    result(Results.failuire(it.message.toString()))
+                }
+            }
+
 
     }
+
+    override suspend fun seenMessages(messages: List<String>) {
+        val batch = firestore.batch()
+        messages.forEach { messageId ->
+            val messageRef = firestore.collection(MESSAGES_COLLECTION).document(messageId)
+            batch.update(messageRef, "seen", true)
+        }
+        batch.commit().await()
+    }
+
 }

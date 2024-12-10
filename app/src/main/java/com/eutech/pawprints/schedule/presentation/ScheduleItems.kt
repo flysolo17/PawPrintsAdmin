@@ -168,7 +168,7 @@ fun AssignDoctor(
                         onConfirm(it)
                         expanded =!expanded
                     } },
-                    leadingIcon = { Avatar(image = doctors.profile ?: "", size = 24.dp) }
+                    leadingIcon = { Avatar(image = doctors.profile ?: "", size = 24.dp, onClick = {}) }
                 )
             }
 

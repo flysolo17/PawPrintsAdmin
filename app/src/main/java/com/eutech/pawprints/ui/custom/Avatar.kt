@@ -2,6 +2,7 @@ package com.eutech.pawprints.ui.custom
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
@@ -20,7 +21,8 @@ import com.eutech.pawprints.R
 fun Avatar(
     modifier: Modifier = Modifier,
     image : String,
-    size  : Dp = 120.dp
+    size  : Dp = 120.dp,
+    onClick : () -> Unit
 ) {
     AsyncImage(
         modifier = modifier
@@ -28,7 +30,7 @@ fun Avatar(
             .clip(CircleShape)
             .background(
                 color = Color.Gray
-            ),
+            ).clickable { onClick() },
         model = image,
         contentScale = ContentScale.Crop,
         contentDescription = "Profile",

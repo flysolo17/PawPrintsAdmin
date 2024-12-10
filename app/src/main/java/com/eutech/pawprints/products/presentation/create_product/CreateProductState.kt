@@ -11,6 +11,9 @@ data class CreateProductState(
     val message : String ? = null,
     val formHasError : Boolean = false,
     val errors : String ? = null,
+
+
+
     val categoryList : List<Category> = emptyList(),
     //forms
     val selectedProductType : ProductType = ProductType.GOODS,

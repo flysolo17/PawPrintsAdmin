@@ -6,12 +6,14 @@ import java.util.Date
 
 data class MedicalRecord(
     val id : String = generateRandomNumber(),
+    val images : List<String> = emptyList(),
     val petID: String = "",
     val diagnosis: String = "",
     val treatment: String = "",
-    val vetName: String = "",
-    val vetContact: String = "",
+    val doctorID :String ? = null,
     val notes: String = "",
-    val prescriptions: List<String> = listOf(),
+    val prescriptions: List<Prescription> = listOf(),
     val date: Date = Date(),
 )
+
+

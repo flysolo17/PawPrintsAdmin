@@ -1,7 +1,14 @@
 package com.eutech.pawprints.shared.presentation.utils
 
+import android.Manifest
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.eutech.pawprints.products.data.products.Discount
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -113,3 +120,19 @@ fun Date.toEndOfMonth(): Date {
     return calendar.time
 }
 
+
+fun Context.navigateToPhone(phone: String) {
+    val intent = Intent(Intent.ACTION_CALL).apply { data = Uri.parse("tel:$phone") }
+    if (
+        ContextCompat.checkSelfPermission(this, android.Manifest.permission.CALL_PHONE) ==
+        PackageManager.PERMISSION_GRANTED
+        ) {
+        startActivity(intent)
+    }
+    else {
+        ActivityCompat.requestPermissions( this as Activity, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PHONE )
+
+        this.toast("Permission denied to make phone calls")
+    }
+}
+const val REQUEST_CALL_PHONE = 1

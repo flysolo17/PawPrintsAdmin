@@ -25,4 +25,30 @@ class UsersRepositoryImpl(
                 }
             }
     }
+
+    override suspend fun getUserByID(
+        userID: String,
+        result: (Results<Users?>) -> Unit
+    ) {
+        result(Results.loading("Getting user with ID: $userID"))
+        firestore.collection(USERS_COLLECTION)
+            .document(userID)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val user = document.toObject(Users::class.java)
+                    result(Results.success(user))
+                } else {
+                    result(Results.failuire("User with ID: $userID not found"))
+                }
+            }
+            .addOnFailureListener { exception ->
+                result(Results.failuire(exception.message.toString()))
+                USERS_COLLECTION.createLog(
+                    exception.message.toString(),
+                    exception
+                )
+            }
+    }
+
 }

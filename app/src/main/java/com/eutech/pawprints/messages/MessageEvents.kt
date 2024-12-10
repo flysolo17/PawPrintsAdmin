@@ -22,4 +22,8 @@ sealed interface MessageEvents  {
         val receiver : String,
     ): MessageEvents
 
+    data class OnSeen(
+        val messages : List<String>
+    ) : MessageEvents
+
 }

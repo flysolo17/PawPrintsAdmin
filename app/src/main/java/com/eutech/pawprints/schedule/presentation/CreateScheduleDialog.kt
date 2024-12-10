@@ -1,13 +1,12 @@
 package com.eutech.pawprints.schedule.presentation
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,7 +16,6 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -63,6 +61,7 @@ fun CreateScheduleDialog(
     Dialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(
+            usePlatformDefaultWidth = false,
             dismissOnBackPress  = false,
             dismissOnClickOutside = false
         )
@@ -71,6 +70,7 @@ fun CreateScheduleDialog(
             shape = RoundedCornerShape(16.dp),
             color = MaterialTheme.colorScheme.surface,
             modifier = modifier
+                .wrapContentHeight()
                 .width(900.dp)
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
@@ -119,13 +119,15 @@ fun CreateScheduleDialog(
                         }
                     }
                 }
+
                 PawPrintDatePicker(
                     label = "Select Date",
                     value = date,
 
                     onChange = {
                         date = it
-                    }
+                    },
+                    modifier = modifier.fillMaxWidth()
                 )
                 Row(
                     modifier = modifier.fillMaxWidth(),

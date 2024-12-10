@@ -9,6 +9,11 @@ import java.util.Date
 
 
 const val PETS_COLLECTION = "pets"
+
+data class Details(
+    val label : String ? = "",
+    val value : String ? = "",
+)
 data class Pet(
     val id: String? = null,
     var ownerID: String? = null,
@@ -17,7 +22,7 @@ data class Pet(
     val species: String? = null,
     val breed: String? = null,
     val birthday: String? = null,
-    val otherDetails: Map<String, String>? = null,
+    val otherDetails: List<Details> = emptyList(),
     val createdAt : Date?= Date(),
     val updatedAt : Date? = Date()
 )

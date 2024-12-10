@@ -20,22 +20,34 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.Tab
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.EventAvailable
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Pending
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,9 +63,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 
 import com.eutech.pawprints.appointments.data.appointment.AppointmentStatus
+import com.eutech.pawprints.appointments.data.appointment.AppointmentWithAttendeesAndPets
 import com.eutech.pawprints.appointments.data.appointment.Appointments
+import com.eutech.pawprints.home.presentation.components.AppointmentCard
 import com.eutech.pawprints.schedule.data.display
 import com.eutech.pawprints.shared.presentation.routes.MainRouter
+import com.eutech.pawprints.shared.presentation.utils.toast
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -67,211 +83,150 @@ fun AppointmentScreen(
     events : (AppointmentEvent) -> Unit,
     navHostController: NavHostController
 ) {
-    LazyVerticalGrid(
+    val scope = rememberCoroutineScope()
+    val pagerState = rememberPagerState(
+        initialPage = state.selectedTab,
+        pageCount = {3},
+    )
+    val context = LocalContext.current
+    LaunchedEffect(state) {
+        if (state.errors != null) {
+            context.toast(state.errors)
+        }
+        if (state.isUpdated != null ) {
+            context.toast(state.isUpdated)
+        }
+    }
+    LaunchedEffect(pagerState.currentPage) {
+        if (pagerState.currentPage != state.selectedTab) {
+            events(AppointmentEvent.OnTabSelected(pagerState.currentPage))
+        }
+    }
+    LaunchedEffect(state.selectedTab) {
+        scope.launch {
+            pagerState.animateScrollToPage(state.selectedTab)
+        }
+    }
+    val tabs = listOf(
+        Pair("Pending", Icons.Default.Pending),
+        Pair("Upcoming", Icons.Default.EventAvailable),
+        Pair("All", Icons.Default.List)
+    )
+
+    Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        columns = GridCells.Fixed(2),
-        contentPadding = PaddingValues(8.dp)
-    ) {
-        item(
-            span = { GridItemSpan(2) }
-        ) {
-            AppointmentTopBar(onCreate = {
-                navHostController.navigate(MainRouter.CreateAppointment.route)
-            })
-        }
-        val items = AppointmentStatus.entries.toList()
-        item(
-            span = { GridItemSpan(2) }
-        ) {
-            Row(modifier = modifier
-                .background(
-                    color = Color.LightGray,
-                    shape = RoundedCornerShape(8.dp)
-                )
-                .padding(8.dp)
-
-            ) {
-                items.forEach {
-                    val isSelected = state.selectedTab == it
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = modifier
-                            .padding(4.dp)
-                            .background(
-                                color = if (isSelected) MaterialTheme.colorScheme.secondary else Color.Transparent,
-                                shape = RoundedCornerShape(8.dp)
-                            )
-                            .clickable {
-                                events(AppointmentEvent.OnTabSelected(it))
-                            }
-                    ) {
-                        Text(
-                            modifier = modifier.padding(8.dp),
-                            text = it.name,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                            color = if (isSelected) MaterialTheme.colorScheme.onSecondary else Color.Gray
-                        )
-                    }
-                }
-            }
-        }
-
-        val filteredAppointments = state.appointments.filter { it.status?.name == state.selectedTab.name }
-        items(filteredAppointments,key={it.id!!}) {
-            AppointmentCard(it = it, events = events)
-        }
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun AppointmentCard(
-    modifier: Modifier = Modifier,
-    it: Appointments,
-    events: (AppointmentEvent) -> Unit
-) {
-    OutlinedCard(
     ) {
         Row(
-            modifier = modifier.padding(12.dp),
+            modifier = modifier
+                .fillMaxWidth()
+                .background(color = MaterialTheme.colorScheme.primary),
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            DisplayDate(scheduleDate = it.scheduleDate ?: "")
-            Spacer(modifier = modifier.width(8.dp))
-            Column(
-                modifier = modifier
-                    .weight(1f)
+            IconButton(
+                onClick = { navHostController.popBackStack() }
             ) {
-                Text(
-                    text = it.title?.uppercase() ?:"",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                Icon(
+                    Icons.Filled.ArrowBack,
+                    contentDescription = "back",
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
-                Spacer(modifier = modifier.height(8.dp))
-                val date = buildAnnotatedString {
-
-                    withStyle(style = SpanStyle(color = Color.Gray, fontWeight = FontWeight.Normal)) {
-                        append("Date : ")
-                    }
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("${it.scheduleDate}")
-                    }
-                }
-
-                Text(
-                    text = date,
-                    style = MaterialTheme.typography.titleSmall
+            }
+            Text(
+                "Appointments", style = MaterialTheme.typography.titleLarge.copy(
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                val annotatedString = buildAnnotatedString {
-                    withStyle(style = SpanStyle(color = Color.Gray, fontWeight = FontWeight.Normal)) {
-                        append("Time : ")
+            )
+        }
+        TabRow(
+            selectedTabIndex = pagerState.currentPage
+        ) {
+            tabs.forEachIndexed { index, tab ->
+                val selected = state.selectedTab == index
+                Tab(
+                    selected = selected,
+                    onClick = {
+                        events(AppointmentEvent.OnTabSelected(index))
+                    },
+                    text = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = tab.second,
+                                contentDescription = tab.first,
+                                tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = tab.first,
+                                color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("${it.startTime?.display()} - ${it.endTime?.display()}")
-                    }
-                }
-
-                Text(
-                    text = annotatedString,
-                    style = MaterialTheme.typography.titleSmall
                 )
-                Spacer(modifier = modifier.height(8.dp))
-                Text(text = "Attendees",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = Color.Gray,
-                    fontWeight = FontWeight.Bold
-                )
-                it.attendees.forEach {
-                    Column(
-                        modifier = modifier.padding(2.dp)
-                    ) {
-                        Text(text = "${it.name} (${it.type})",
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(text = it.email?:"")
-                        Text(text = "${it.phone}")
-                    }
-                }
+            }
+        }
+        if (state.isLoading) {
+            LinearProgressIndicator(
+                modifier = modifier.fillMaxWidth()
+            )
+        }
+        HorizontalPager(
+            modifier = modifier.fillMaxSize(),
+            state = pagerState
+        ) {
 
-                if (!it.note.isNullOrEmpty()) {
-                    Text(
-                        text = "Note : ${it.note}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.error
+            when(it) {
+                0 -> {
+                    val appointments = state.appointments.filter {
+                        it.appointments.status == AppointmentStatus.PENDING
+                    }
+                    SelectedTab(
+                        index = 0,
+                        appointments = appointments,
+                        state = state,
+                        events = events,
                     )
                 }
-
+                1 -> {
+                    val appointments = state.appointments.filter {
+                        it.appointments.status == AppointmentStatus.CONFIRMED
+                    }
+                    SelectedTab(index = 1, appointments = appointments,    state = state,
+                        events = events,)
+                }
+                2 -> {
+                    SelectedTab(index = 2, appointments = state.appointments,    state = state,
+                        events = events,)
+                }
             }
-            val context = LocalContext.current
-            EditDropDown(onSave = { s ->
-                events.invoke(AppointmentEvent.OnUpdateStatus(
-                    id = it.id!!,
-                    status = s,
-                    context = context
-                ))
-            })
         }
     }
 }
+
 @Composable
-fun EditDropDown(
+fun SelectedTab(
     modifier: Modifier = Modifier,
-    onSave: (AppointmentStatus) -> Unit
+    index: Int,
+    appointments : List<AppointmentWithAttendeesAndPets>,
+    state: AppointmentState,
+    events: (AppointmentEvent) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    var selectedStatus by remember { mutableStateOf(AppointmentStatus.PENDING) } // Default value
-
-    val statusOptions = AppointmentStatus.entries.toTypedArray()
-
-    Column {
-        OutlinedButton(
-            modifier = modifier,
-            onClick = { expanded = true },
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Text(text = "Edit")
-        }
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            DropdownMenuItem(
-                onClick = {
-                    expanded = false
-                    onSave(AppointmentStatus.COMPLETED)
+    LazyVerticalGrid(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        columns = GridCells.Adaptive(350.dp),
+    ) {
+        items(appointments) {
+            AppointmentCard(
+                data = it,
+                isLoading = state.updatingStatus,
+                onUpdateStatus = { status , appointment ->
+                    events.invoke(AppointmentEvent.OnUpdateAppointment(status,appointment))
                 }
-            ) {
-                Text(text = "Appointment Complete")
-            }
-            DropdownMenuItem(
-                onClick = {
-                    expanded = false
-                    onSave(AppointmentStatus.CANCELLED)
-                }
-            ) {
-                Text(text = "Cancel Appointment")
-            }
-            val context = LocalContext.current
-            DropdownMenuItem(
-                onClick = {
-                    Toast.makeText(context, "Not yet implemented", Toast.LENGTH_SHORT).show()
-                }
-            ) {
-                Text(text = "Reschedule")
-            }
-            DropdownMenuItem(
-                onClick = {
-                    Toast.makeText(context, "Not yet implemented", Toast.LENGTH_SHORT).show()
-                }
-            ) {
-                Text(text = "Add Attendees")
-            }
+            )
         }
     }
 }
@@ -311,42 +266,28 @@ fun DisplayDate(scheduleDate: String) {
     } else {
         Text("Invalid Date")
     }
-
 }
 @Composable
 fun AppointmentTopBar(
     modifier: Modifier = Modifier,
-    onCreate : () -> Unit
+    onCreate : () -> Unit,
+    onBack : () -> Unit
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Column(
-        ) {
-            Text(text = "Appointments", style = MaterialTheme.typography.titleLarge)
-        }
-        Row {
-            Button(
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    containerColor = MaterialTheme.colorScheme.primary
-                ),
-                onClick = onCreate
-            ) {
-                Row(
-                    modifier = modifier.padding(4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add")
-                    Text(text = "Create Appointment")
-                }
-            }
-        }
+        IconButton(
+            onClick = {onBack}
+        ) { Icon(
+            imageVector = Icons.Filled.ArrowBack,
+            contentDescription = "back"
+        ) }
+        Text(text = "Appointments", style = MaterialTheme.typography.titleLarge)
+
+
     }
 }

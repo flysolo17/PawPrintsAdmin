@@ -1,5 +1,8 @@
 package com.eutech.pawprints.auth.presentation.profile
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,12 +19,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.eutech.pawprints.products.presentation.create_product.CreateProductEvents
 import com.eutech.pawprints.shared.presentation.utils.ErrorScreen
+import com.eutech.pawprints.shared.presentation.utils.toast
 import com.eutech.pawprints.ui.custom.Avatar
 
 
@@ -33,7 +44,44 @@ fun ProfileScreen(
     navHostController: NavHostController,
     onLogout : () -> Unit
 ) {
+    val context = LocalContext.current
+    var editDialog by remember { mutableStateOf(false) }
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            events(ProfileEvents.OnProfileChange(it))
+        }
+    }
+    LaunchedEffect(state) {
+        if (state.errors != null) {
+            context.toast(state.errors)
+        }
+        if (state.isChanged != null) {
+            context.toast(state.isChanged)
+        }
+    }
 
+    if (editDialog) {
+        state.administrator?.let {
+            EditProfileDialog(
+                admin = state.administrator,
+                onDismiss = {editDialog = !editDialog},
+                onConfirm = {name,phone,email ->
+                    events(
+                        ProfileEvents.OnUpdate(
+                            id = state.administrator?.id ?: "",
+                            name,
+                            phone,
+                            email
+                        )
+                    )
+                    editDialog = !editDialog
+                }
+            )
+        }
+
+    }
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -62,7 +110,10 @@ fun ProfileScreen(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Avatar(image = admin?.profile ?: "")
+                        Avatar(
+                            image = admin?.profile ?: "",
+                            onClick = { imagePickerLauncher.launch("image/*") }
+                        )
                         Text(
                             text = admin?.name ?: "No name",
                             style = MaterialTheme.typography.titleLarge
@@ -85,7 +136,7 @@ fun ProfileScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Button(
-                                onClick = { /*TODO*/ },
+                                onClick = { editDialog = !editDialog },
                                 modifier = modifier.weight(1f),
                                 shape = RoundedCornerShape(8.dp),
                                 colors = ButtonDefaults.buttonColors(

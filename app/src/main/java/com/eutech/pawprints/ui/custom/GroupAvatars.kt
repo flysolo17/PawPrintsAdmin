@@ -28,7 +28,7 @@ fun GroupAvatars(
                 modifier = modifier
                     .offset(x = (-offset * index).dp) // Use offset for horizontal overlap
                     .zIndex(3 - index.toFloat()), // Ensures each avatar is stacked in the right order
-                size = avatarSize
+                size = avatarSize, onClick = {}
             )
         }
     }

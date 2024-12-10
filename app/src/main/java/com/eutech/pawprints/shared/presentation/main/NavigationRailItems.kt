@@ -12,7 +12,7 @@ enum class NavigationRailItems(
     @DrawableRes val selectedIcon : Int,
     @DrawableRes val unselectedIcon : Int,
     val hasNews : Boolean,
-    val badgeCount : Int? = null,
+    var badgeCount : Int? = null,
     val route : String
 ){
 

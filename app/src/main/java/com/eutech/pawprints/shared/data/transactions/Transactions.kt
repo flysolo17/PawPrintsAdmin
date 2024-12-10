@@ -1,6 +1,16 @@
 package com.eutech.pawprints.shared.data.transactions
 
 import android.os.Parcelable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Cancel
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.DirectionsCar
+import androidx.compose.material.icons.rounded.Done
+import androidx.compose.material.icons.rounded.HelpOutline
+import androidx.compose.material.icons.rounded.HourglassEmpty
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.eutech.pawprints.appointments.data.appointment.AppointmentStatus
 import kotlinx.parcelize.Parcelize
 import java.util.Date
 
@@ -25,6 +35,34 @@ enum class TransactionStatus(val status: String) {
 }
 
 
+fun TransactionStatus?.getColor(): Color {
+    return when (this) {
+        TransactionStatus.ACCEPTED -> Color(0xFF4CAF50)  // green
+        TransactionStatus.PENDING -> Color(0xFFFFEB3B)    // yellow
+        TransactionStatus.CANCELLED -> Color(0xFFF44336)  // red
+        TransactionStatus.COMPLETED -> Color(0xFF2E7D32)  // dark green
+        TransactionStatus.TO_PICK_UP ->  Color(0xFFFFEB3B)
+        else -> Color(0xFFF44336)
+    }
+}
+
+fun List<TransactionItems>.computeTotal(): Double {
+    return this.sumOf { it.quantity!! * it.price!! }
+}
+
+
+fun TransactionStatus?.getIcon(): ImageVector {
+    return when (this) {
+        TransactionStatus.ACCEPTED -> Icons.Rounded.CheckCircle
+        TransactionStatus.PENDING -> Icons.Rounded.HourglassEmpty
+        TransactionStatus.CANCELLED -> Icons.Rounded.Cancel
+        TransactionStatus.COMPLETED -> Icons.Rounded.Done
+        TransactionStatus.TO_PICK_UP -> Icons.Rounded.DirectionsCar
+        else -> Icons.Rounded.HelpOutline
+    }
+}
+
+
 fun TransactionStatus.createMessage(): String {
     return when (this) {
         TransactionStatus.PENDING -> "Your transaction is currently pending. Please wait for further updates."
@@ -36,5 +74,6 @@ fun TransactionStatus.createMessage(): String {
 }
 
 enum class TransactionType {
-    PICK_UP
+    PICK_UP,
+    IN_STORE,
 }

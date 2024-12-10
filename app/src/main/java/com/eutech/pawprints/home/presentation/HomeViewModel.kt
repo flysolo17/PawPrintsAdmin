@@ -19,6 +19,7 @@ import com.eutech.pawprints.products.domain.CategoryRepository
 import com.eutech.pawprints.products.domain.ProductRepository
 import com.eutech.pawprints.schedule.domain.ScheduleRepository
 import com.eutech.pawprints.schedule.presentation.ScheduleEvents
+import com.eutech.pawprints.shared.domain.repository.transactions.TransactionRepository
 import com.eutech.pawprints.shared.presentation.utils.Results
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.GlobalScope
@@ -34,11 +35,13 @@ class HomeViewModel @Inject constructor(
      private val authRepository: AuthRepository,
     private val scheduleRepository: ScheduleRepository,
     private val appointmentRepository: AppointmentRepository,
+    private val transactionRepository: TransactionRepository
 ) : ViewModel() {
     var state by mutableStateOf(HomeState())
 
     init {
         events(HomeEvents.OnGetSchedules(state.selectedDate))
+        events(HomeEvents.GetOnlineOrders)
     }
     fun events(e : HomeEvents) {
         when(e) {
@@ -50,6 +53,29 @@ class HomeViewModel @Inject constructor(
                 e.status,
                 e.appointments
             )
+            HomeEvents.GetOnlineOrders -> getOrders()
+        }
+    }
+
+    private fun getOrders() {
+        viewModelScope.launch {
+            transactionRepository.getAllOnGoingTransaction {
+                state = when(it) {
+                    is Results.failuire -> state.copy(
+                        isLoading = false,
+                        errors = it.message
+                    )
+                    is Results.loading -> state.copy(
+                        isLoading = false,
+                        errors = null,
+                    )
+                    is Results.success -> state.copy(
+                        isLoading = false,
+                        errors = null,
+                        orders = it.data,
+                    )
+                }
+            }
         }
     }
 

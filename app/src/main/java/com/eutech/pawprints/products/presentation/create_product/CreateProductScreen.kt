@@ -141,6 +141,7 @@ fun CreateProductScreen(
 @Composable
 fun ImagePicker(
     modifier: Modifier = Modifier,
+    default :String ? = null,
     image: Uri?,
     onChangeImage : () -> Unit
 ) {

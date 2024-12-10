@@ -6,4 +6,5 @@ import com.eutech.pawprints.shared.presentation.utils.Results
 interface UsersRepository {
 
     suspend fun getAllUsers(result : (Results<List<Users>>) -> Unit)
+    suspend fun getUserByID(userID : String ,result: (Results<Users?>) -> Unit)
 }

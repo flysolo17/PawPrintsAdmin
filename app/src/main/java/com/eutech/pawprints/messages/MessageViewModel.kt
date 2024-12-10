@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.eutech.pawprints.shared.data.messages.Message
 import com.eutech.pawprints.shared.data.messages.UserType
+import com.eutech.pawprints.shared.data.messages.UserWithMessages
 import com.eutech.pawprints.shared.domain.repository.messages.MessagesRepository
 import com.eutech.pawprints.shared.presentation.utils.Results
 import com.eutech.pawprints.shared.presentation.utils.generateRandomNumber
@@ -27,9 +28,7 @@ class MessageViewModel @Inject constructor(
     fun events(e : MessageEvents) {
         when(e) {
             MessageEvents.OnGetMessages -> getMessages()
-            is MessageEvents.OnSelectConversation -> state = state.copy(
-                selectedConvo = e.userWithMessages
-            )
+            is MessageEvents.OnSelectConversation -> selectConvo(e.userWithMessages)
 
             is MessageEvents.OnSetAdmin -> state = state.copy(
                 administrator = e.administrator
@@ -39,6 +38,24 @@ class MessageViewModel @Inject constructor(
                 message = e.message
             )
             is MessageEvents.OnSendMessage -> sendMessage(e.receiver)
+            is MessageEvents.OnSeen -> seenMessage(e.messages)
+        }
+    }
+
+    private fun selectConvo(userWithMessages: UserWithMessages) {
+        state = state.copy(
+            selectedConvo = userWithMessages
+        )
+        val unseenMessages = userWithMessages.messages.filter { !it.seen && it.type == UserType.CLIENT }
+        if (unseenMessages.isNotEmpty()) {
+            val ids= unseenMessages.map { it.id!!}
+            events(MessageEvents.OnSeen(ids))
+        }
+    }
+
+    private fun seenMessage(messages: List<String>) {
+        viewModelScope.launch {
+            messagesRepository.seenMessages(messages)
         }
     }
 
