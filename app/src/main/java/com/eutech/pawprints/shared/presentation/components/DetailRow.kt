@@ -16,10 +16,11 @@ import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun DetailRow(label: String, value: String,hasDivider : Boolean = true) {
+fun DetailRow(label: String, value: String, hasDivider : Boolean = true) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+
             .padding(4.dp),
     ) {
         Row(

@@ -40,7 +40,7 @@ class HomeViewModel @Inject constructor(
     var state by mutableStateOf(HomeState())
 
     init {
-        events(HomeEvents.OnGetSchedules(state.selectedDate))
+
         events(HomeEvents.GetOnlineOrders)
     }
     fun events(e : HomeEvents) {
@@ -54,6 +54,13 @@ class HomeViewModel @Inject constructor(
                 e.appointments
             )
             HomeEvents.GetOnlineOrders -> getOrders()
+            is HomeEvents.ChangeSelectedMonth -> state = state.copy(
+                selectedDate = e.localDate
+            )
+
+            is HomeEvents.OnSetAdmin -> state = state.copy(
+                admin = e.admin
+            )
         }
     }
 

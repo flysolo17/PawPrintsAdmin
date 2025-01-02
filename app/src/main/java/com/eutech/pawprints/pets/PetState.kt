@@ -14,21 +14,6 @@ data class PetState(
     val pets : List<Pet> = emptyList(),
     val filteredPets : List<Pet> = emptyList(),
     val errors : String ? = null,
-    val selectedPet : Pet? = null,
-    val searchText : String = "",
-
-    val isAddingInfo : Boolean = false,
-    val isGettingPetSchedule : Boolean = false,
-    val selectedPetAppointments : List<Appointments> = emptyList(),
-    val medicalRecords : List<MedicalRecordWithDoctor> = emptyList(),
-    val petAppointmentError : String ? = null,
-    val messages : String ? = null,
-
-
-    val isGettingDoctors : Boolean =false,
-    val doctors : List<Doctors> = emptyList(),
-
-
-    val isGettingMedicalRecord : Boolean = false,
-    val isAddingMedicalRecord : Boolean = false
+    val selectedSpecies : String = "all",
+    val searchText : String = ""
 )

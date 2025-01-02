@@ -48,7 +48,6 @@ fun MedicalInfo(
         modifier = modifier.fillMaxSize()
     ) {
         LazyColumn(
-
             contentPadding = PaddingValues(8.dp),
             modifier = Modifier.fillMaxSize()
         ) {

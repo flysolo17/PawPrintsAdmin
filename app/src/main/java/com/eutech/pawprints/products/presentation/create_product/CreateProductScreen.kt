@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -214,7 +215,11 @@ fun ProductInfo(
                 onCategorySelected = {events(CreateProductEvents.OnSelectCategory(it))},
                 onAddCategory = {
                     events.invoke(CreateProductEvents.OnCreateCategory(it))
-                })
+                },
+                onDeleteCategory = {
+                    events(CreateProductEvents.DeleteCategory(it))
+                }
+            )
             ProductTypeDropdown(
                 modifier = modifier.weight(.4f),
                 types = ProductType.entries.toList(),
@@ -335,7 +340,8 @@ fun CategoryDropdown(
     categories: List<Category>,
     selectedCategory: Category?,
     onCategorySelected: (Category ?) -> Unit,
-    onAddCategory: (String) -> Unit
+    onAddCategory: (String) -> Unit,
+    onDeleteCategory : (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -381,6 +387,14 @@ fun CategoryDropdown(
             categories.forEach { section ->
                 DropdownMenuItem(
                     text = { Text(section.name?: "no category") },
+                    trailingIcon = {
+                        IconButton(onClick = {onDeleteCategory(section.id ?: "")}) {
+                            Icon(
+                                imageVector =Icons.Default.Close,
+                                contentDescription = "Delete"
+                            )
+                        }
+                    },
                     onClick = {
                         onCategorySelected(section)
                         expanded = false

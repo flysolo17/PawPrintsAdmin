@@ -174,7 +174,11 @@ fun EditProductInfo(
                 onCategorySelected = {events(EditProductEvents.OnSelectCategory(it))},
                 onAddCategory = {
 
-                })
+                },
+                onDeleteCategory = {
+
+                }
+            )
             ProductTypeDropdown(
                 modifier = modifier.weight(.4f),
                 types = ProductType.entries.toList(),

@@ -25,7 +25,9 @@ sealed interface EditProductEvents  {
     data class OnExpirationSave(val date : String) : EditProductEvents
 
     data class OnGetProductByID(val productID : String) : EditProductEvents
-
+    data class OnDeleteCategory(
+        val id : String
+    ) : EditProductEvents
 }
 
 enum class FormField {

@@ -91,7 +91,8 @@ fun PawPrintCalendarView(
                 val isSelected = date == selectedDate
                 Box(
                     modifier = Modifier
-                        .aspectRatio(1f)
+                        .fillMaxWidth()
+                        .height(100.dp)
                         .padding(4.dp)
                         .clickable {
                             onDateSelected(date!!)
@@ -126,7 +127,7 @@ fun PawPrintCalendarView(
 
                     }
                     date?.let {
-                        if (it.dayOfWeek.value != 6 && it.dayOfWeek.value != 7) {
+                        if (it.dayOfWeek.value != 7) {
                             val slots = schedules.countSlots(it)
                             Text(
                                 text = if (slots == 0) "No Slots" else "$slots slots",

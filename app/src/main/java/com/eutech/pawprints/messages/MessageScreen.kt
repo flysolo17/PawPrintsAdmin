@@ -210,17 +210,17 @@ fun ConversationLayout(
                         modifier = modifier
                             .widthIn(max = 300.dp)
                             .background(
-                                color = if (it.type == UserType.ADMIN) MaterialTheme.colorScheme.primary else Color.Blue,
+                                color = if (it.type == UserType.ADMIN) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer,
                                 shape = MaterialTheme.shapes.medium
                             ),
                         text = {
                             Text(
                                 it.message ?: "",
-                                color = if (it.type == UserType.ADMIN) MaterialTheme.colorScheme.onPrimary else Color.White,
+                                color = if (it.type == UserType.ADMIN) MaterialTheme.colorScheme.onPrimary else  MaterialTheme.colorScheme.onSecondaryContainer,
                             )
                         },
                         secondaryText = {
-                            MessageTimestamp(date = it.createdAt)
+                            MessageTimestamp(date = it.createdAt,)
                         }
                     )
 
@@ -329,9 +329,7 @@ fun MessageTimestamp(
 
     Text(
         text = formattedDate,
-        style = MaterialTheme.typography.labelSmall.copy(
-            color = MaterialTheme.colorScheme.onSurface
-        ),
+        style = MaterialTheme.typography.labelSmall.copy(),
         modifier = modifier
     )
 }

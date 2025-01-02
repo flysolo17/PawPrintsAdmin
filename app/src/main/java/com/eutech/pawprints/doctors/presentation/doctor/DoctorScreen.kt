@@ -18,14 +18,18 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ListItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -43,6 +47,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
@@ -112,8 +117,7 @@ fun DoctorsScreen(
             DoctorCard(
                 doctors = it,
                 onClick = {
-                    navHostController.navigate(MainRouter.ViewDoctor.navigate(it.id ?: ""))
-                    context.toast("Navigating")
+
                 },
                 onEdit={},
                 onDelete= {events.invoke(DoctorEvents.OnDeleteDoctor(it))},
@@ -122,6 +126,7 @@ fun DoctorsScreen(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun DoctorCard(
     modifier: Modifier = Modifier,
@@ -142,19 +147,36 @@ fun DoctorCard(
             placeholder = painterResource(R.drawable.doctor_filled),
             error = painterResource(R.drawable.doctor_filled)
         )
-        Column(
-            modifier = modifier.padding(8.dp)
-        ) {
-            Text(
-                text = "${doctors.name}",
-                maxLines = 2,
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = "${doctors.phone}",
-                maxLines = 1,
-            )
-        }
+        ListItem(
+            modifier = modifier.fillMaxWidth().padding(8.dp),
+            text = {
+                Text(
+                    text = "${doctors.name}",
+                    maxLines = 1,
+                   overflow = TextOverflow.Ellipsis
+                )
+            },
+            secondaryText = {
+                Text(
+                    text = "${doctors.phone}",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            },
+            trailing = {
+                IconButton(
+                    onClick = {
+                        onDelete()
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        )
     }
 }
 

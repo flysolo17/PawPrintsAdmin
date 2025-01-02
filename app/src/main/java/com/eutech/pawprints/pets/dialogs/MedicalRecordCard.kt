@@ -40,6 +40,7 @@ fun MedicalRecordCard(data: MedicalRecordWithDoctor) {
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            Text(text = "Date: ${record.date.displayDate()}", style = MaterialTheme.typography.titleLarge)
             if (record.images.isNotEmpty()) {
                 Text(text = "Images:", style = MaterialTheme.typography.titleMedium)
                 LazyRow(
@@ -53,9 +54,10 @@ fun MedicalRecordCard(data: MedicalRecordWithDoctor) {
             }
             Text(text = "Diagnosis: ${record.diagnosis}", style = MaterialTheme.typography.titleMedium)
             Text(text = "Treatment: ${record.treatment}", style = MaterialTheme.typography.titleMedium)
-            Text(text = "Vet Name: ${record.doctorID ?: "Unknown"}", style = MaterialTheme.typography.titleMedium)
-            Text(text = "Notes: ${record.notes}", style = MaterialTheme.typography.titleMedium)
-            Text(text = "Date: ${record.date.displayDate()}", style = MaterialTheme.typography.titleMedium)
+
+            Text(text = "Vet Name: ${doctor?.name ?: "Unknown"}", style = MaterialTheme.typography.titleMedium)
+            Text(text = "${record.notes}", style = MaterialTheme.typography.titleMedium)
+
 
             Text(text = "Prescriptions:", style = MaterialTheme.typography.titleMedium)
             record.prescriptions.forEach { prescription ->

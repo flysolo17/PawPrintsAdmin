@@ -173,51 +173,56 @@ fun ViewProductBody(
             .padding(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ){
-        Column(
+        Card(
             modifier = modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Row(
-                modifier = modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            Column(
+                modifier = modifier.fillMaxWidth().padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                AsyncImage(
-                    modifier = modifier
-                        .size(280.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop,
-                    model = product.image,
-                    contentDescription = product.name,
-                    error = painterResource(id = R.drawable.product),
-                    fallback = painterResource(id = R.drawable.product),
-                    placeholder = painterResource(id = R.drawable.product),
-                )
-                Column(
-                    modifier = modifier.padding(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ){
+                Row(
+                    modifier = modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    AsyncImage(
+                        modifier = modifier
+                            .size(280.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                        contentScale = ContentScale.Crop,
+                        model = product.image,
+                        contentDescription = product.name,
+                        error = painterResource(id = R.drawable.product),
+                        fallback = painterResource(id = R.drawable.product),
+                        placeholder = painterResource(id = R.drawable.product),
+                    )
+                    Column(
+                        modifier = modifier.padding(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ){
 
-                    PawPrintText(data = "Stocks", value = product.quantity.toString())
-                    PawPrintText(data = "Cost", value = product.cost.toPhp())
-                    PawPrintText(data = "Price", value = product.price.toPhp())
-                    PawPrintText(data = "Discount", value = "${product.discount ?: 0 } %")
-                    PawPrintText(data = "Type", value = product.type.name)
-                    PawPrintText(data = "Expiration", value = product.expiration?.toExpireFormat() ?: "No Date")
-                    PawPrintText(data = "CreatedAt", value = product.createdAt.toCreatedAt())
-                    PawPrintText(data = "UpdatedAt", value = product.createdAt.toCreatedAt())
+                        PawPrintText(data = "Stocks", value = product.quantity.toString())
+                        PawPrintText(data = "Cost", value = product.cost.toPhp())
+                        PawPrintText(data = "Price", value = product.price.toPhp())
+                        PawPrintText(data = "Discount", value = "${product.discount ?: 0 } %")
+                        PawPrintText(data = "Type", value = product.type.name)
+                        PawPrintText(data = "Expiration", value = product.expiration?.toExpireFormat() ?: "No Date")
+                        PawPrintText(data = "CreatedAt", value = product.createdAt.toCreatedAt())
+                        PawPrintText(data = "UpdatedAt", value = product.createdAt.toCreatedAt())
+                    }
+
                 }
 
+                Spacer(modifier = modifier.height(4.dp))
+                Text(text = product.description ?: "")
+                Spacer(modifier = modifier.height(4.dp))
+                Text(text = "Features", style = MaterialTheme.typography.titleMedium)
+                Text(text = product.features ?: "")
+                Spacer(modifier = modifier.height(4.dp))
+                Text(text = "Contents", style = MaterialTheme.typography.titleMedium)
+                Text(text = product.contents ?: "")
             }
-
-            Spacer(modifier = modifier.height(4.dp))
-            Text(text = product.description ?: "")
-            Spacer(modifier = modifier.height(4.dp))
-            Text(text = "Features", style = MaterialTheme.typography.titleMedium)
-            Text(text = product.features ?: "")
-            Spacer(modifier = modifier.height(4.dp))
-            Text(text = "Contents", style = MaterialTheme.typography.titleMedium)
-            Text(text = product.contents ?: "")
         }
+
         if (product.type == ProductType.GOODS) {
             LazyColumn(
                 modifier = modifier.fillMaxSize() .weight(.6f).padding(8.dp),

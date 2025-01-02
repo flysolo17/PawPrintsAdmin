@@ -31,7 +31,8 @@ enum class TransactionStatus(val status: String) {
     ACCEPTED("ACCEPTED"),
     TO_PICK_UP("TO_PICK_UP"),
     COMPLETED("COMPLETED"),
-    CANCELLED("CANCELLED")
+    CANCELLED("CANCELLED"),
+    RESERVED("RESERVED")
 }
 
 
@@ -70,6 +71,7 @@ fun TransactionStatus.createMessage(): String {
         TransactionStatus.CANCELLED -> "Your transaction has been cancelled. Let us know if you need help."
         TransactionStatus.COMPLETED -> "Your transaction has been successfully completed. Thank you!"
         TransactionStatus.TO_PICK_UP -> "Your Order is ready to pick up"
+        TransactionStatus.RESERVED -> "Your transaction has been reserved. Further instructions will follow shortly."
     }
 }
 

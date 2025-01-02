@@ -28,8 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.eutech.pawprints.pets.PetEvents
-import com.eutech.pawprints.pets.components.PetInfo
+
 import com.eutech.pawprints.ui.theme.PawPrintsTheme
 import com.eutech.pawprints.users.components.UserCard
 import com.eutech.pawprints.users.components.UserInfoLayout

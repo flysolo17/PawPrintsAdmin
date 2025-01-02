@@ -58,6 +58,7 @@ class DoctorRepositoryImpl(
             if (!doctors.profile.isNullOrEmpty()) {
                 storage.getReferenceFromUrl(doctors.profile!!).delete().await()
             }
+            
             firestore.collection(DOCTORS_COLLECTION)
                 .document(doctors.id!!)
                 .delete()

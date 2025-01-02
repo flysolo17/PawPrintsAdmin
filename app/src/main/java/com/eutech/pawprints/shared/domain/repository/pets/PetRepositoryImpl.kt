@@ -6,10 +6,14 @@ import com.eutech.pawprints.shared.data.medical.MedicalRecordWithDoctor
 import com.eutech.pawprints.shared.data.pets.Details
 import com.eutech.pawprints.shared.data.pets.PETS_COLLECTION
 import com.eutech.pawprints.shared.data.pets.Pet
+import com.eutech.pawprints.shared.data.pets.PetWithOwner
+import com.eutech.pawprints.shared.data.users.USERS_COLLECTION
+import com.eutech.pawprints.shared.data.users.Users
 import com.eutech.pawprints.shared.presentation.utils.Results
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.toObject
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.tasks.await
@@ -105,6 +109,56 @@ class PetRepositoryImpl(
             Result.success(medicalRecords)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    override suspend fun getPetInfoWithOwner(
+        petID: String,
+        result: (Results<PetWithOwner>) -> Unit
+    ) {
+        result(Results.loading("Getting pet with owner"))
+        delay(1000)
+        firestore.collection(PETS_COLLECTION)
+            .document(petID)
+            .addSnapshotListener { petSnapshot, petError ->
+                if (petError != null) {
+                    result(Results.failuire(petError.localizedMessage.toString()))
+                    return@addSnapshotListener
+                }
+
+                val pet = petSnapshot?.toObject(Pet::class.java)
+                if (pet != null) {
+                    firestore.collection(USERS_COLLECTION)
+                        .document(pet.ownerID ?: "")
+                        .addSnapshotListener { ownerSnapshot, ownerError ->
+                            if (ownerError != null) {
+                                result(Results.failuire(ownerError.localizedMessage.toString()))
+                                return@addSnapshotListener
+                            }
+
+                            val owner = ownerSnapshot?.toObject(Users::class.java)
+                            if (owner != null) {
+                                val petWithOwner = PetWithOwner(pet, owner)
+                                result(Results.success(petWithOwner))
+                            } else {
+                                result(Results.failuire("Owner data is null"))
+                            }
+                        }
+                } else {
+                    result(Results.failuire("Pet data is null"))
+                }
+            }
+    }
+
+    override suspend fun deletePet(id: String): Result<String> {
+        return try {
+            firestore.collection(PETS_COLLECTION)
+                .document(id)
+                .delete()
+                .await()
+            Result.success("Pet deleted successfully.")
+        } catch (e: Exception) {
+            Result.failure(e) // Return the exception as a failure result
         }
     }
 

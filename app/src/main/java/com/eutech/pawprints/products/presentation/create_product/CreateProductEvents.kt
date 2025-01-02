@@ -15,7 +15,10 @@ sealed interface CreateProductEvents {
     data object OnGetAllCategories : CreateProductEvents
     data class OnCreateCategory(val category : String) : CreateProductEvents
     data class SubmitProduct(val context: Context,val navHostController: NavHostController): CreateProductEvents
+    data class DeleteCategory(
+        val id : String,
 
+    ) : CreateProductEvents
 }
 
 enum class FormField {

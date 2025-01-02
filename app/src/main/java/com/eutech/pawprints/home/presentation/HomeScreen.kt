@@ -3,6 +3,7 @@ package com.eutech.pawprints.home.presentation
 import android.os.Build
 import android.widget.CalendarView
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -18,7 +19,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Checklist
@@ -27,6 +30,7 @@ import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 
 import androidx.compose.material3.Text
@@ -38,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.modifier.modifierLocalMapOf
@@ -49,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.os.trace
 import androidx.navigation.NavHostController
+import com.eutech.pawprints.R
 import com.eutech.pawprints.appointments.data.appointment.AppointmentStatus
 import com.eutech.pawprints.appointments.data.appointment.Appointments
 import com.eutech.pawprints.appointments.data.appointment.getFormattedDate
@@ -77,6 +83,10 @@ fun HomeScreen(
 
     val currentDate = remember { Date() }
 
+    LaunchedEffect(state.selectedDate) {
+        events(HomeEvents.OnGetSchedules(state.selectedDate))
+    }
+
     // Filter appointments based on whether the date is past due
     val pastDueAppointments by remember(state.appointment) {
         mutableStateOf(
@@ -92,10 +102,13 @@ fun HomeScreen(
         state.messages?.let { context.toast(it) }
     }
 
+//
+//    if (pastDueAppointments.isNotEmpty()) {
+//        events(HomeEvents.OnAutoCancelAppointments(pastDueAppointments))
+//    }
 
-    if (pastDueAppointments.isNotEmpty()) {
-        events(HomeEvents.OnAutoCancelAppointments(pastDueAppointments))
-    }
+
+
     Row(
         modifier = modifier
             .fillMaxSize()
@@ -106,6 +119,29 @@ fun HomeScreen(
                 .fillMaxSize()
                 .weight(1f)
         ) {
+            Column {
+                Row(
+                    modifier = modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    ListItem(
+                        leadingContent = {
+                            Image(
+                                painter = painterResource(R.drawable.logo),
+                                contentDescription = "Logo",
+                                modifier = modifier.size(32.dp).clip(CircleShape),
+
+                                )
+                        },
+                        headlineContent = {
+                            Text("Welcome to Aucena Veterinary App")
+                        },
+                        supportingContent = {
+                            Text("Clinic Hours: Mon - Fri 9:00 AM- 5:30 PM,Sat - Appointment Only", style = MaterialTheme.typography.labelMedium)
+                        }
+                    )
+                }
             Card(modifier = modifier.fillMaxSize().padding(8.dp)) {
                 val schedules = state.schedules.map {it.schedule!!}
                 PawPrintCalendarView(
@@ -117,9 +153,11 @@ fun HomeScreen(
                         events(HomeEvents.OnDateChange(it))
                     },
                     onMonthChange = {
-                        events(HomeEvents.OnGetSchedules(it))
+                        events(HomeEvents.ChangeSelectedMonth(it))
                     }
                 )
+                }
+
             }
         }
 

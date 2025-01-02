@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.eutech.pawprints.appointments.data.appointment.Appointments
 import com.eutech.pawprints.appointments.presentation.appointment.PetAppointmentCard
 import com.eutech.pawprints.pets.PetState
 
@@ -16,10 +17,12 @@ import com.eutech.pawprints.pets.PetState
 @Composable
 fun PetAppointmentsLayout(
     modifier: Modifier = Modifier,
-    state : PetState,
+    isLoading : Boolean,
+    appointments : List<Appointments>,
+    error : String ? = null,
 ) {
     when {
-        state.isGettingPetSchedule -> {
+        isLoading -> {
             Box(
                 modifier = modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -27,20 +30,20 @@ fun PetAppointmentsLayout(
                 CircularProgressIndicator()
             }
         }
-        state.selectedPetAppointments.isEmpty() ->  Box(
+        appointments.isEmpty() && !isLoading ->  Box(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             Text("No Appointment Yet")
         }
-        state.petAppointmentError != null -> Box(
+        error != null -> Box(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text(state.petAppointmentError)
+            Text(error)
         } else -> {
         LazyColumn {
-            items(state.selectedPetAppointments) {
+            items(appointments) {
                 PetAppointmentCard(appointments = it)
             }
         }

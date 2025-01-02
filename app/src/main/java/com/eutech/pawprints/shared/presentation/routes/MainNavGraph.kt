@@ -35,6 +35,8 @@ import com.eutech.pawprints.orders.OrderScreen
 import com.eutech.pawprints.orders.OrderViewModel
 import com.eutech.pawprints.pets.PetScreen
 import com.eutech.pawprints.pets.PetViewModel
+import com.eutech.pawprints.pets.view_pets.ViewPetScreen
+import com.eutech.pawprints.pets.view_pets.ViewPetViewModel
 import com.eutech.pawprints.pos.PosScreen
 import com.eutech.pawprints.pos.PosViewModel
 import com.eutech.pawprints.schedule.presentation.ScheduleScreen
@@ -77,6 +79,19 @@ fun MainNavGraph(
         composable(MainRouter.Pets.route) {
             val viewModel = hiltViewModel<PetViewModel>()
             PetScreen(state = viewModel.state, events = viewModel::events, navController = navHostController)
+        }
+        composable(route = MainRouter.VIEW_PETS.route) { backStackEntry ->
+            val viewModel = hiltViewModel<ViewPetViewModel>()
+
+            // Retrieve the `id` argument
+            val id = backStackEntry.arguments?.getString("id") ?: ""
+
+            ViewPetScreen(
+                id = id,
+                state = viewModel.state,
+                events = viewModel::events,
+                navHostController = navHostController
+            )
         }
         composable(MainRouter.Users.route) {
             val viewModel = hiltViewModel<UsersViewModel>()

@@ -3,11 +3,13 @@ package com.eutech.pawprints.home.presentation
 import com.eutech.pawprints.appointments.data.appointment.AppointmentStatus
 import com.eutech.pawprints.appointments.data.appointment.AppointmentWithAttendeesAndPets
 import com.eutech.pawprints.appointments.data.appointment.Appointments
+import com.eutech.pawprints.auth.data.Administrator
 import com.eutech.pawprints.products.data.products.Products
 import com.eutech.pawprints.products.presentation.product.ProductEvents
 import org.threeten.bp.LocalDate
 
 sealed interface  HomeEvents {
+    data class OnSetAdmin(val admin  : Administrator ?) : HomeEvents
     data class OnGetSchedules(val localDate: LocalDate) : HomeEvents
     data class OnDateChange(val localDate: LocalDate) : HomeEvents
     data class OnGetAppointments(val localDate: LocalDate) : HomeEvents
@@ -15,4 +17,5 @@ sealed interface  HomeEvents {
     data class OnAutoCancelAppointments(val appointments:  List<AppointmentWithAttendeesAndPets>): HomeEvents
 
     data object GetOnlineOrders : HomeEvents
+    data class ChangeSelectedMonth(val localDate: LocalDate) : HomeEvents
 }

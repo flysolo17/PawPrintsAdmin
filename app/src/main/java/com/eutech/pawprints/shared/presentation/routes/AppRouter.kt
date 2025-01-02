@@ -22,6 +22,9 @@ sealed class MainRouter(val route : String) {
     data object Pos : MainRouter("pos")
     data object Messages : MainRouter("messages")
     data object Pets : MainRouter("pets")
+    data object VIEW_PETS : MainRouter("pets/{id}") {
+        fun createRoute(id: String): String = "pets/$id"
+    }
     data object Users : MainRouter("users")
     data object ScheduleRoute : MainRouter("schedules")
     data object Appointments : MainRouter("appointments")

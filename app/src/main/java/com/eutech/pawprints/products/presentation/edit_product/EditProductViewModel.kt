@@ -43,6 +43,7 @@ class EditProductViewModel @Inject constructor(
             is EditProductEvents.OnSetProduct -> setProduct(e.products)
             is EditProductEvents.OnExpirationSave -> state = state.copy(expiration = e.date)
             is EditProductEvents.OnGetProductByID -> getProductByID(e.productID)
+            is EditProductEvents.OnDeleteCategory -> deleteCategory(id = e.id)
         }
     }
 
@@ -75,6 +76,13 @@ class EditProductViewModel @Inject constructor(
             ),
             expiration = products.expiration?.displayDate() ?: "",
         )
+    }
+    private fun deleteCategory(id: String) {
+        viewModelScope.launch {
+            categoryRepository.deleteCategory(id) {
+
+            }
+        }
     }
 
     private fun save(products: Products) {

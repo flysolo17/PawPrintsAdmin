@@ -29,148 +29,37 @@ class PetViewModel @Inject constructor(
     var state by mutableStateOf(PetState())
     init {
         events(PetEvents.OnGetPets)
-
     }
     fun events(e : PetEvents) {
         when(e) {
             PetEvents.OnGetPets -> getPets()
             is PetEvents.OnSearchPet -> search(text = e.text)
-            is PetEvents.OnSelectPet -> selectPet(e.pet)
-            is PetEvents.OnGetPetAppointments -> getPetAppointments(e.petID)
-            is PetEvents.OnAddInfo -> addInfo(e.petID,e.label,e.value)
-            PetEvents.OnGetAllDoctors -> getDoctors()
-            is PetEvents.OnSavemedicalRecord -> addmedicalRecord(
-                e.petID,
-                e.record,
-                e.images
-            )
-
-            is PetEvents.OngetMedicalRecord ->getRecords(e.petID)
+            is PetEvents.OnSelectSpecies -> selectSpecies(e.species)
         }
     }
 
-    private fun getRecords(petID: String) {
-        viewModelScope.launch {
+    private fun selectSpecies(species: String) {
+        if (species == "all") {
             state = state.copy(
-                isGettingMedicalRecord =true
+                filteredPets = state.pets,
+                selectedSpecies = species
             )
-            val result = petRepository.getAllMedicalRecordWithDoctor(petID)
-            if (result.isSuccess) {
-                val records = result.getOrNull() ?: emptyList()
-                val doctors = state.doctors
-
-                // Map each medical record with its associated doctor
-                val recordsWithDoctors = records.map { medicalRecord ->
-                    val doctor = doctors.find { it.id == medicalRecord.doctorID }
-                    MedicalRecordWithDoctor(
-                        record = medicalRecord,
-                        doctors = doctor
-                    )
-                }
-
-                // Update state with records and associated doctors
-                state= state.copy(
-                    isGettingMedicalRecord = false,
-                    medicalRecords = recordsWithDoctors
-                )
-            } else {
-                val error = result.exceptionOrNull()
-                state = state.copy(
-                    isGettingMedicalRecord = false,
-                    errors = error?.message?:""
-                )
+        } else {
+            val filteredPets = state.pets.filter {
+                it.species.equals(species, ignoreCase = true)
             }
-        }
-    }
-
-    private fun addmedicalRecord(petID: String, record: MedicalRecord, images: List<Uri>) {
-        viewModelScope.launch {
             state = state.copy(
-                isAddingInfo = true
+                filteredPets = filteredPets,
+                selectedSpecies = species
             )
-            petRepository.addMedicalInfo(
-                petID,
-                record, images
-            ).onSuccess {
-                state = state.copy(
-                    isAddingInfo = false
-                )
-            }.onFailure {
-                state = state.copy(
-                    isAddingInfo = false
-                )
-            }
-        }
-    }
-
-    private fun getDoctors() {
-        viewModelScope.launch {
-            doctorRepository.getAllDoctors {
-                if (it is Results.success) {
-                    state = state.copy(
-                        doctors = it.data
-                    )
-                }
-            }
-        }
-
-    }
-
-    private fun addInfo(petID: String, label: String, value: String) {
-        viewModelScope.launch {
-            val data = Details(
-                label = label,
-                value = value
-            )
-            state = state.copy(
-                isAddingInfo = true
-            )
-            petRepository.addPetInfo(
-                petID,
-                data
-            ).onSuccess {
-                state = state.copy(
-                    isAddingInfo = false,
-                    selectedPet = state.selectedPet?.copy( otherDetails = state.selectedPet?.otherDetails.orEmpty() + it )
-                )
-            }.onFailure {
-               state = state.copy(
-                   isAddingInfo = false,
-                    errors = it.localizedMessage?.toString()
-                )
-            }
-        }
-    }
-
-    private fun selectPet(pet: Pet) {
-        state = state.copy(selectedPet = pet)
-    }
-
-    private fun getPetAppointments(petID: String) {
-        viewModelScope.launch {
-
-            appointmentRepository.getAppointmentByPetID(petID) {
-                state = when(it) {
-                    is Results.failuire -> state.copy(
-                        isGettingPetSchedule = false,
-                        petAppointmentError = it.message,
-                    )
-                    is Results.loading -> state.copy(
-                        isGettingPetSchedule = true,
-                        petAppointmentError = null
-                    )
-                    is Results.success -> state.copy(
-                        isGettingPetSchedule = false,
-                        petAppointmentError = null,
-                        selectedPetAppointments = it.data
-                    )
-                }
-            }
         }
     }
 
 
     private fun search(text: String) {
+        state = state.copy(
+            selectedSpecies = "all"
+        )
         val filteredList = if (text.isBlank()) {
             state.pets
         } else {
@@ -195,7 +84,6 @@ class PetViewModel @Inject constructor(
                         errors = null
                     )
                     is Results.success -> {
-                        events(PetEvents.OnGetAllDoctors)
                         state.copy(
                             isLoading = false,
                             errors = null,

@@ -44,6 +44,16 @@ class CreateProductViewModel @Inject constructor(
             is CreateProductEvents.OnProductTypeChange -> state = state.copy(
                 selectedProductType = e.type
             )
+
+            is CreateProductEvents.DeleteCategory -> deleteCategory(e.id)
+        }
+    }
+
+    private fun deleteCategory(id: String) {
+        viewModelScope.launch {
+            categoryRepository.deleteCategory(id) {
+
+            }
         }
     }
 

@@ -26,6 +26,7 @@ import coil.compose.AsyncImage
 import com.eutech.pawprints.R
 import com.eutech.pawprints.shared.data.pets.Pet
 import com.eutech.pawprints.shared.data.pets.getAge
+import com.eutech.pawprints.shared.data.users.Users
 import com.eutech.pawprints.shared.presentation.components.DetailRow
 import com.eutech.pawprints.ui.theme.PawPrintsTheme
 import java.util.Date
@@ -33,7 +34,8 @@ import java.util.Date
 @Composable
 fun PetDetails(
     modifier: Modifier = Modifier,
-    pet: Pet
+    pet: Pet,
+    owner : Users? = null
 ) {
     val age = pet.birthday?.getAge()
     Column(
@@ -75,6 +77,9 @@ fun PetDetails(
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
+
+        DetailRow(label = "Owner", value = "${owner?.name ?: "Unknown"}")
+
         DetailRow(label = "Breed", value = pet.breed ?: "Unknown")
 
         val age = pet.birthday?.getAge()?.toString() ?: "Unknown"
